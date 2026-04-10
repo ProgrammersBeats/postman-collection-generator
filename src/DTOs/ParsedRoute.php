@@ -13,6 +13,7 @@ class ParsedRoute
      * @param array<string> $middleware
      * @param array<string, mixed> $parameters
      * @param array<string, mixed> $validationRules
+     * @param array<string, mixed> $responseExample
      */
     public function __construct(
         public readonly string $uri,
@@ -29,6 +30,10 @@ class ParsedRoute
         public readonly bool $isLogoutRoute,
         public readonly ?string $prefix,
         public readonly ?string $resourceName,
+        public readonly ?string $responseResourceClass = null,
+        public readonly ?string $modelClass = null,
+        public readonly array $responseExample = [],
+        public readonly ?string $rateLimitInfo = null,
     ) {}
 
     /**
@@ -93,13 +98,51 @@ class ParsedRoute
     }
 
     /**
+     * Get the expected success status code based on the HTTP method.
+     */
+    public function getExpectedStatusCode(): int
+    {
+        return match ($this->getPrimaryMethod()) {
+            'POST' => 201,
+            'DELETE' => 204,
+            default => 200,
+        };
+    }
+
+    /**
+     * Generate a cURL command for this route.
+     */
+    public function toCurl(string $baseUrl = 'http://localhost:8000'): string
+    {
+        $method = $this->getPrimaryMethod();
+        $url = rtrim($baseUrl, '/') . '/' . ltrim($this->getPostmanUri(), '/');
+
+        // Replace :param with placeholder values
+        $url = preg_replace('/:(\w+)/', '{$1}', $url);
+
+        $parts = ["curl -X {$method}"];
+        $parts[] = "  '{$url}'";
+        $parts[] = "  -H 'Accept: application/json'";
+        $parts[] = "  -H 'Content-Type: application/json'";
+
+        if ($this->requiresAuth) {
+            $parts[] = "  -H 'Authorization: Bearer YOUR_TOKEN'";
+        }
+
+        if (in_array($method, ['POST', 'PUT', 'PATCH']) && !empty($this->validationRules)) {
+            $parts[] = "  -d '{}'";
+        }
+
+        return implode(" \\\n", $parts);
+    }
+
+    /**
      * Get route parameters as Postman-formatted array.
      */
     public function getPostmanParameters(): array
     {
         $params = [];
 
-        // Extract path parameters from URI
         preg_match_all('/\{([^}]+)\}/', $this->uri, $matches);
 
         foreach ($matches[1] as $param) {
@@ -130,7 +173,6 @@ class ParsedRoute
             return (string) $rules;
         }
 
-        // Common parameter descriptions
         $commonDescriptions = [
             'id' => 'Resource ID',
             'uuid' => 'Resource UUID',
@@ -149,7 +191,6 @@ class ParsedRoute
      */
     public function getPostmanUri(): string
     {
-        // Convert Laravel route parameters to Postman variables
         return preg_replace('/\{([^}?]+)\??}/', ':$1', $this->uri);
     }
 
@@ -181,6 +222,10 @@ class ParsedRoute
             'is_logout_route' => $this->isLogoutRoute,
             'prefix' => $this->prefix,
             'resource_name' => $this->resourceName,
+            'response_resource_class' => $this->responseResourceClass,
+            'model_class' => $this->modelClass,
+            'response_example' => $this->responseExample,
+            'rate_limit_info' => $this->rateLimitInfo,
         ];
     }
 }

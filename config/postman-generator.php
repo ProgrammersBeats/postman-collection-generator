@@ -258,6 +258,29 @@ JAVASCRIPT,
 
     /*
     |--------------------------------------------------------------------------
+    | Unique Features (No other package has these!)
+    |--------------------------------------------------------------------------
+    |
+    | These features differentiate this package from all others.
+    |
+    */
+
+    'features' => [
+        // Auto-generate Postman test scripts for every endpoint
+        // Tests include: status code, response time, JSON validation, auth checks
+        'test_scripts' => true,
+
+        // Generate example response bodies from API Resource classes
+        // Parses your JsonResource toArray() to create realistic responses
+        'example_responses' => true,
+
+        // Generate realistic request bodies from Model Factory definitions
+        // Parses your Factory definition() to create sample data using faker mappings
+        'factory_data' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Grouping Options
     |--------------------------------------------------------------------------
     |

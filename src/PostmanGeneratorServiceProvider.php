@@ -6,6 +6,7 @@ namespace ProgrammersBeats\PostmanGenerator;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use ProgrammersBeats\PostmanGenerator\Commands\DiffCollectionCommand;
 use ProgrammersBeats\PostmanGenerator\Commands\GeneratePostmanCollectionCommand;
 use ProgrammersBeats\PostmanGenerator\Contracts\CollectionGeneratorInterface;
 use ProgrammersBeats\PostmanGenerator\Contracts\RouteParserInterface;
@@ -43,6 +44,7 @@ class PostmanGeneratorServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 GeneratePostmanCollectionCommand::class,
+                DiffCollectionCommand::class,
             ]);
 
             $this->publishes([

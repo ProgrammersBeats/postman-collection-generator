@@ -20,6 +20,9 @@ class GeneratorOptions
         public readonly ?string $baseUrl,
         public readonly ?string $outputPath,
         public readonly array $authMiddleware = ['auth', 'auth:sanctum', 'auth:api', 'auth:web'],
+        public readonly bool $includeTestScripts = true,
+        public readonly bool $includeExampleResponses = true,
+        public readonly bool $includeFactoryData = true,
     ) {}
 
     /**
@@ -41,6 +44,9 @@ class GeneratorOptions
             baseUrl: $options['base_url'] ?? config('postman-generator.base_url'),
             outputPath: $options['output_path'] ?? config('postman-generator.output_path'),
             authMiddleware: $options['auth_middleware'] ?? ['auth', 'auth:sanctum', 'auth:api', 'auth:web'],
+            includeTestScripts: $options['include_test_scripts'] ?? config('postman-generator.features.test_scripts', true),
+            includeExampleResponses: $options['include_example_responses'] ?? config('postman-generator.features.example_responses', true),
+            includeFactoryData: $options['include_factory_data'] ?? config('postman-generator.features.factory_data', true),
         );
     }
 
@@ -63,6 +69,9 @@ class GeneratorOptions
             'base_url' => $this->baseUrl,
             'output_path' => $this->outputPath,
             'auth_middleware' => $this->authMiddleware,
+            'include_test_scripts' => $this->includeTestScripts,
+            'include_example_responses' => $this->includeExampleResponses,
+            'include_factory_data' => $this->includeFactoryData,
         ];
     }
 }

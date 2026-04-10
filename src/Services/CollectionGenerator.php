@@ -22,11 +22,17 @@ use ProgrammersBeats\PostmanGenerator\Generators\TagGroupingStrategy;
 class CollectionGenerator implements CollectionGeneratorInterface
 {
     protected array $strategies = [];
+    protected TestScriptGenerator $testScriptGenerator;
+    protected ExampleResponseGenerator $exampleResponseGenerator;
+    protected FactoryDataGenerator $factoryDataGenerator;
 
     public function __construct(
         protected RouteParserInterface $routeParser,
     ) {
         $this->registerDefaultStrategies();
+        $this->testScriptGenerator = new TestScriptGenerator();
+        $this->exampleResponseGenerator = new ExampleResponseGenerator();
+        $this->factoryDataGenerator = new FactoryDataGenerator();
     }
 
     /**
@@ -34,20 +40,13 @@ class CollectionGenerator implements CollectionGeneratorInterface
      */
     public function generate(GeneratorOptions $options): PostmanCollection
     {
-        // Parse routes
         $routes = $this->routeParser->parse();
         $routes = $this->routeParser->filter($routes);
 
-        // Get grouping strategy
         $strategy = $this->getStrategy($options->groupingStrategy);
-
-        // Group routes
         $groupedRoutes = $strategy->group($routes);
-
-        // Build collection items (folders and requests) with nested structure
         $items = $this->buildItems($groupedRoutes, $options, $strategy);
 
-        // Create collection
         return PostmanCollection::create(
             name: $options->collectionName,
             description: $this->buildCollectionDescription($options),
@@ -75,20 +74,55 @@ class CollectionGenerator implements CollectionGeneratorInterface
     }
 
     /**
-     * Generate an environment file for the collection.
+     * Generate a zero-config environment file.
+     * Uses actual APP_URL so users can import and use immediately.
      */
     public function generateEnvironment(string $name): array
     {
-        $envVars = config('postman-generator.export.environment_variables', []);
+        // Auto-detect the base URL from the application config
+        $appUrl = rtrim(config('app.url', 'http://localhost:8000'), '/');
+        $apiBaseUrl = $appUrl . '/api';
 
-        $values = [];
-        foreach ($envVars as $key => $defaultValue) {
-            $values[] = [
-                'key' => $key,
-                'value' => $defaultValue,
+        $values = [
+            [
+                'key' => 'base_url',
+                'value' => $apiBaseUrl,
                 'type' => 'default',
                 'enabled' => true,
-            ];
+            ],
+            [
+                'key' => 'auth_token',
+                'value' => '',
+                'type' => 'secret',
+                'enabled' => true,
+            ],
+            [
+                'key' => 'token_expiry',
+                'value' => '',
+                'type' => 'default',
+                'enabled' => true,
+            ],
+            [
+                'key' => 'app_url',
+                'value' => $appUrl,
+                'type' => 'default',
+                'enabled' => true,
+            ],
+        ];
+
+        // Add any custom environment variables from config
+        $customVars = config('postman-generator.export.environment_variables', []);
+        $existingKeys = array_column($values, 'key');
+
+        foreach ($customVars as $key => $defaultValue) {
+            if (!in_array($key, $existingKeys)) {
+                $values[] = [
+                    'key' => $key,
+                    'value' => $defaultValue,
+                    'type' => 'default',
+                    'enabled' => true,
+                ];
+            }
         }
 
         return [
@@ -97,7 +131,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
             'values' => $values,
             '_postman_variable_scope' => 'environment',
             '_postman_exported_at' => now()->toISOString(),
-            '_postman_exported_using' => 'Laravel Postman Generator',
+            '_postman_exported_using' => 'Laravel Postman Generator by ProgrammersBeats',
         ];
     }
 
@@ -120,18 +154,12 @@ class CollectionGenerator implements CollectionGeneratorInterface
         return $path;
     }
 
-    /**
-     * Register a grouping strategy.
-     */
     public function registerStrategy(string $name, GroupingStrategyInterface $strategy): self
     {
         $this->strategies[$name] = $strategy;
         return $this;
     }
 
-    /**
-     * Get a grouping strategy by name.
-     */
     protected function getStrategy(string $name): GroupingStrategyInterface
     {
         if (!isset($this->strategies[$name])) {
@@ -141,9 +169,6 @@ class CollectionGenerator implements CollectionGeneratorInterface
         return $this->strategies[$name];
     }
 
-    /**
-     * Register default grouping strategies.
-     */
     protected function registerDefaultStrategies(): void
     {
         $this->strategies = [
@@ -158,13 +183,9 @@ class CollectionGenerator implements CollectionGeneratorInterface
 
     /**
      * Build collection items with nested folder structure from grouped routes.
-     *
-     * Group keys containing '/' are split into nested folders.
-     * E.g., key 'auth/pin' creates Auth > Pin folder hierarchy.
      */
     protected function buildItems(array $groupedRoutes, GeneratorOptions $options, GroupingStrategyInterface $strategy): array
     {
-        // Build a tree from group keys
         $tree = [];
 
         foreach ($groupedRoutes as $groupKey => $routes) {
@@ -172,13 +193,9 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $this->insertIntoTree($tree, $segments, $routes);
         }
 
-        // Convert the tree into Postman folder items
         return $this->renderTree($tree, $options);
     }
 
-    /**
-     * Insert routes into the tree at the correct depth.
-     */
     private function insertIntoTree(array &$tree, array $segments, array $routes): void
     {
         $segment = array_shift($segments);
@@ -197,9 +214,6 @@ class CollectionGenerator implements CollectionGeneratorInterface
         }
     }
 
-    /**
-     * Recursively convert the tree into Postman-compatible folder/request items.
-     */
     private function renderTree(array $tree, GeneratorOptions $options, string $parentPath = ''): array
     {
         $items = [];
@@ -215,13 +229,11 @@ class CollectionGenerator implements CollectionGeneratorInterface
                 'item' => [],
             ];
 
-            // Add nested sub-folders first
             if (!empty($node['children'])) {
                 $childItems = $this->renderTree($node['children'], $options, $currentPath);
                 $folder['item'] = array_merge($folder['item'], $childItems);
             }
 
-            // Add routes as request items
             if (!empty($node['routes'])) {
                 $folder['description'] = $this->buildFolderDescription($node['routes'], $options);
 
@@ -230,7 +242,6 @@ class CollectionGenerator implements CollectionGeneratorInterface
                 }
             }
 
-            // Only include folders that have content
             if (!empty($folder['item'])) {
                 $items[] = $folder;
             }
@@ -239,24 +250,18 @@ class CollectionGenerator implements CollectionGeneratorInterface
         return $items;
     }
 
-    /**
-     * Get a display name for a folder segment, checking config overrides first.
-     */
     private function getFolderDisplayName(string $segment, string $fullPath): string
     {
         $customNames = config('postman-generator.grouping.folder_names', []);
 
-        // Check full path first (e.g., 'auth/pin' => 'PIN Management')
         if (isset($customNames[$fullPath])) {
             return $customNames[$fullPath];
         }
 
-        // Check segment name (e.g., 'pin' => 'PIN Management')
         if (isset($customNames[$segment])) {
             return $customNames[$segment];
         }
 
-        // Default to Title Case
         return Str::title(str_replace(['-', '_'], ' ', $segment));
     }
 
@@ -274,7 +279,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
             ],
         ];
 
-        // Add description if full descriptive mode
+        // Add description
         if ($options->fullDescriptive) {
             $request['request']['description'] = $this->buildRequestDescription($route, $options);
         }
@@ -284,28 +289,34 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $request['request']['body'] = $this->buildRequestBody($route, $options);
         }
 
-        // Add pre-request script for authenticated routes
+        // Build events (pre-request + test scripts)
+        $events = [];
+
+        // Pre-request script for authenticated routes
         if ($route->requiresAuth && $options->includeBearer) {
-            $request['event'] = $this->buildRequestEvents($route, $options);
+            $events = array_merge($events, $this->buildRequestEvents($route, $options));
         }
 
-        // Add post-response script for login routes
+        // Login post-response scripts
         if ($route->isLoginRoute) {
-            $request['event'] = array_merge(
-                $request['event'] ?? [],
-                $this->buildLoginEvents()
-            );
+            $events = array_merge($events, $this->buildLoginEvents());
         }
 
-        // Add post-response script for logout routes
+        // Logout post-response scripts
         if ($route->isLogoutRoute) {
-            $request['event'] = array_merge(
-                $request['event'] ?? [],
-                $this->buildLogoutEvents()
-            );
+            $events = array_merge($events, $this->buildLogoutEvents());
         }
 
-        // Add auth inheritance
+        // Auto-generated test scripts
+        if ($options->includeTestScripts) {
+            $events[] = $this->testScriptGenerator->buildTestEvent($route);
+        }
+
+        if (!empty($events)) {
+            $request['event'] = $events;
+        }
+
+        // Auth inheritance
         if ($route->requiresAuth) {
             $request['request']['auth'] = [
                 'type' => 'bearer',
@@ -319,12 +330,16 @@ class CollectionGenerator implements CollectionGeneratorInterface
             ];
         }
 
+        // Example responses
+        if ($options->includeExampleResponses) {
+            $request['response'] = [
+                $this->exampleResponseGenerator->buildPostmanExample($route),
+            ];
+        }
+
         return $request;
     }
 
-    /**
-     * Build request headers.
-     */
     protected function buildHeaders(ParsedRoute $route): array
     {
         return config('postman-generator.request_defaults.headers', [
@@ -333,18 +348,13 @@ class CollectionGenerator implements CollectionGeneratorInterface
         ]);
     }
 
-    /**
-     * Build request URL.
-     */
     protected function buildUrl(ParsedRoute $route, GeneratorOptions $options): array
     {
         $baseUrl = $options->baseUrl ?? config('postman-generator.base_url', '{{base_url}}');
 
-        // Build path segments
         $uri = $route->getPostmanUri();
         $pathSegments = array_filter(explode('/', $uri));
 
-        // Convert :param to {{param}} and track variables
         $path = [];
         $variables = [];
 
@@ -377,6 +387,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
 
     /**
      * Build request body for POST/PUT/PATCH.
+     * Uses Factory data when available, then validation rules, then empty body.
      */
     protected function buildRequestBody(ParsedRoute $route, GeneratorOptions $options): array
     {
@@ -390,9 +401,34 @@ class CollectionGenerator implements CollectionGeneratorInterface
             ],
         ];
 
-        // Generate sample body from validation rules
-        if ($options->includeValidationRules && !empty($route->validationRules)) {
+        $sampleBody = [];
+
+        // Try factory data first (most realistic)
+        if ($options->includeFactoryData && $route->modelClass) {
+            $factoryData = $this->factoryDataGenerator->generate($route->modelClass);
+            if (!empty($factoryData)) {
+                // Filter factory data to only include fields from validation rules if available
+                if (!empty($route->validationRules)) {
+                    $ruleFields = array_keys($route->validationRules);
+                    $sampleBody = array_intersect_key($factoryData, array_flip($ruleFields));
+                    // Add any validation fields not in factory
+                    foreach ($ruleFields as $field) {
+                        if (!isset($sampleBody[$field])) {
+                            $sampleBody[$field] = $this->getSampleValue($field, '');
+                        }
+                    }
+                } else {
+                    $sampleBody = $factoryData;
+                }
+            }
+        }
+
+        // Fallback to validation rules
+        if (empty($sampleBody) && $options->includeValidationRules && !empty($route->validationRules)) {
             $sampleBody = $this->generateSampleBody($route->validationRules);
+        }
+
+        if (!empty($sampleBody)) {
             $body['raw'] = json_encode($sampleBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         } else {
             $body['raw'] = "{\n    \n}";
@@ -401,27 +437,21 @@ class CollectionGenerator implements CollectionGeneratorInterface
         return $body;
     }
 
-    /**
-     * Generate a sample request body from validation rules.
-     */
     protected function generateSampleBody(array $rules): array
     {
         $body = [];
 
         foreach ($rules as $field => $rule) {
-            // Skip nested field notation for now
             if (Str::contains($field, '.') && !Str::endsWith($field, '.*')) {
                 continue;
             }
 
-            // Handle array fields
             if (Str::endsWith($field, '.*')) {
                 $arrayField = Str::beforeLast($field, '.*');
                 $body[$arrayField] = [];
                 continue;
             }
 
-            // Determine value based on rule type
             $ruleString = is_array($rule) ? implode('|', array_map(fn($r) => is_string($r) ? $r : '', $rule)) : (string) $rule;
 
             $body[$field] = $this->getSampleValue($field, $ruleString);
@@ -430,12 +460,8 @@ class CollectionGenerator implements CollectionGeneratorInterface
         return $body;
     }
 
-    /**
-     * Get a sample value based on field name and rules.
-     */
     protected function getSampleValue(string $field, string $rules): mixed
     {
-        // Check specific field names first
         $fieldSamples = [
             'email' => 'user@example.com',
             'password' => 'password123',
@@ -464,38 +490,16 @@ class CollectionGenerator implements CollectionGeneratorInterface
             return $fieldSamples[$field];
         }
 
-        // Check rules for type hints
-        if (Str::contains($rules, 'integer') || Str::contains($rules, 'numeric')) {
-            return 1;
-        }
+        if (Str::contains($rules, 'integer') || Str::contains($rules, 'numeric')) return 1;
+        if (Str::contains($rules, 'boolean')) return true;
+        if (Str::contains($rules, 'array')) return [];
+        if (Str::contains($rules, 'date')) return now()->format('Y-m-d');
+        if (Str::contains($rules, 'email')) return 'user@example.com';
+        if (Str::contains($rules, 'url')) return 'https://example.com';
 
-        if (Str::contains($rules, 'boolean')) {
-            return true;
-        }
-
-        if (Str::contains($rules, 'array')) {
-            return [];
-        }
-
-        if (Str::contains($rules, 'date')) {
-            return now()->format('Y-m-d');
-        }
-
-        if (Str::contains($rules, 'email')) {
-            return 'user@example.com';
-        }
-
-        if (Str::contains($rules, 'url')) {
-            return 'https://example.com';
-        }
-
-        // Default to string
         return 'sample_value';
     }
 
-    /**
-     * Build request events (pre-request scripts).
-     */
     protected function buildRequestEvents(ParsedRoute $route, GeneratorOptions $options): array
     {
         return [
@@ -516,9 +520,6 @@ class CollectionGenerator implements CollectionGeneratorInterface
         ];
     }
 
-    /**
-     * Build login route post-response events.
-     */
     protected function buildLoginEvents(): array
     {
         $script = config('postman-generator.scripts.login_post_response');
@@ -535,9 +536,6 @@ class CollectionGenerator implements CollectionGeneratorInterface
         ];
     }
 
-    /**
-     * Build logout route post-response events.
-     */
     protected function buildLogoutEvents(): array
     {
         $script = config('postman-generator.scripts.logout_post_response');
@@ -554,17 +552,23 @@ class CollectionGenerator implements CollectionGeneratorInterface
         ];
     }
 
-    /**
-     * Build collection description.
-     */
     protected function buildCollectionDescription(GeneratorOptions $options): string
     {
         $description = $options->description;
 
         $description .= "\n\n---\n\n";
-        $description .= "**Generated by Laravel Postman Generator**\n\n";
+        $description .= "**Generated by Laravel Postman Generator** by [ProgrammersBeats](https://github.com/ProgrammersBeats)\n\n";
         $description .= "- Generated at: " . now()->toDateTimeString() . "\n";
         $description .= "- Grouping Strategy: " . Str::title($options->groupingStrategy) . "\n";
+        $description .= "- Base URL: `{{base_url}}`\n";
+
+        if ($options->includeTestScripts) {
+            $description .= "- Auto-generated test scripts included\n";
+        }
+
+        if ($options->includeExampleResponses) {
+            $description .= "- Example responses included for each endpoint\n";
+        }
 
         if ($options->includeBearer) {
             $description .= "\n### Authentication\n\n";
@@ -574,33 +578,39 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $description .= "3. All authenticated endpoints will automatically use this token\n";
         }
 
+        $description .= "\n### Quick Start\n\n";
+        $description .= "1. Import this collection and the environment file\n";
+        $description .= "2. Select the environment from the dropdown\n";
+        $description .= "3. The `base_url` is pre-configured - start making requests!\n";
+
         return $description;
     }
 
-    /**
-     * Build folder description.
-     */
     protected function buildFolderDescription(array $routes, GeneratorOptions $options): string
     {
         $count = count($routes);
         $authCount = count(array_filter($routes, fn($r) => $r->requiresAuth));
 
-        return "Contains {$count} endpoint(s). {$authCount} require(s) authentication.";
+        $desc = "Contains {$count} endpoint(s). {$authCount} require(s) authentication.";
+
+        // Add rate limit info if any route has it
+        $rateLimited = array_filter($routes, fn($r) => $r->rateLimitInfo !== null);
+        if (!empty($rateLimited)) {
+            $first = reset($rateLimited);
+            $desc .= "\n\nRate Limit: {$first->rateLimitInfo}";
+        }
+
+        return $desc;
     }
 
-    /**
-     * Build request description.
-     */
     protected function buildRequestDescription(ParsedRoute $route, GeneratorOptions $options): string
     {
         $parts = [];
 
-        // PHPDoc description
         if ($options->includePHPDoc && $route->description) {
             $parts[] = $route->description;
         }
 
-        // Route information
         $parts[] = "**Route:** `{$route->uri}`";
         $parts[] = "**Method:** `{$route->getPrimaryMethod()}`";
 
@@ -608,17 +618,22 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $parts[] = "**Name:** `{$route->name}`";
         }
 
-        // Authentication
         if ($route->requiresAuth) {
             $parts[] = "**Authentication:** Required (Bearer Token)";
         }
 
-        // Middleware
+        if ($route->rateLimitInfo) {
+            $parts[] = "**Rate Limit:** {$route->rateLimitInfo}";
+        }
+
         if ($options->includeMiddlewareInfo && !empty($route->middleware)) {
             $parts[] = "**Middleware:** `" . implode('`, `', $route->middleware) . "`";
         }
 
-        // Validation rules
+        // cURL example
+        $baseUrl = config('app.url', 'http://localhost:8000');
+        $parts[] = "\n### cURL\n\n```bash\n" . $route->toCurl($baseUrl) . "\n```";
+
         if ($options->includeValidationRules && !empty($route->validationRules)) {
             $parts[] = "\n### Request Parameters\n";
             foreach ($route->validationRules as $field => $rules) {

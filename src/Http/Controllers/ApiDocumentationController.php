@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use ProgrammersBeats\PostmanGenerator\Contracts\RouteParserInterface;
 use ProgrammersBeats\PostmanGenerator\DTOs\ParsedRoute;
+use ProgrammersBeats\PostmanGenerator\Services\ExampleResponseGenerator;
 
 class ApiDocumentationController extends Controller
 {
@@ -15,6 +16,37 @@ class ApiDocumentationController extends Controller
     {
         $routes = $parser->parse();
         $routes = $parser->filter($routes);
+
+        // Generate example responses for each route
+        if (config('postman-generator.features.example_responses', true)) {
+            $exampleGenerator = new ExampleResponseGenerator();
+            $routes = $routes->map(function (ParsedRoute $route) use ($exampleGenerator) {
+                if (empty($route->responseExample)) {
+                    $example = $exampleGenerator->generate($route);
+                    return new ParsedRoute(
+                        uri: $route->uri,
+                        methods: $route->methods,
+                        name: $route->name,
+                        controller: $route->controller,
+                        action: $route->action,
+                        middleware: $route->middleware,
+                        parameters: $route->parameters,
+                        description: $route->description,
+                        validationRules: $route->validationRules,
+                        requiresAuth: $route->requiresAuth,
+                        isLoginRoute: $route->isLoginRoute,
+                        isLogoutRoute: $route->isLogoutRoute,
+                        prefix: $route->prefix,
+                        resourceName: $route->resourceName,
+                        responseResourceClass: $route->responseResourceClass,
+                        modelClass: $route->modelClass,
+                        responseExample: $example,
+                        rateLimitInfo: $route->rateLimitInfo,
+                    );
+                }
+                return $route;
+            });
+        }
 
         // Get grouping strategy
         $strategyName = config('postman-generator.grouping.default', 'prefix');

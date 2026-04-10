@@ -35,7 +35,10 @@ class GeneratePostmanCollectionCommand extends Command
                             {--env : Also generate environment file}
                             {--no-interaction : Skip interactive prompts and use defaults}
                             {--full : Generate full descriptive collection with all documentation}
-                            {--minimal : Generate minimal collection without extra documentation}';
+                            {--minimal : Generate minimal collection without extra documentation}
+                            {--no-tests : Disable auto-generated test scripts}
+                            {--no-responses : Disable example response generation}
+                            {--no-factory : Disable factory-based sample data}';
 
     /**
      * The console command description.
@@ -230,6 +233,9 @@ class GeneratePostmanCollectionCommand extends Command
             'include_phpdoc' => $includePHPDoc,
             'include_examples' => $includeExamples,
             'output_path' => $outputPath,
+            'include_test_scripts' => !$this->option('no-tests'),
+            'include_example_responses' => !$this->option('no-responses'),
+            'include_factory_data' => !$this->option('no-factory'),
         ]);
     }
 
@@ -253,6 +259,9 @@ class GeneratePostmanCollectionCommand extends Command
             'include_phpdoc' => !$isMinimal,
             'include_examples' => $isFull,
             'output_path' => $this->option('output') ?? config('postman-generator.output_path'),
+            'include_test_scripts' => !$this->option('no-tests'),
+            'include_example_responses' => !$this->option('no-responses'),
+            'include_factory_data' => !$this->option('no-factory'),
         ]);
     }
 
@@ -272,12 +281,15 @@ class GeneratePostmanCollectionCommand extends Command
         $this->line("  Grouping: <fg=white>" . Str::title($options->groupingStrategy) . "</>");
         $this->line("  Bearer Auth: <fg=white>" . ($options->includeBearer ? 'Yes' : 'No') . "</>");
         $this->line("  Environment: <fg=white>" . ($options->includeEnvironment ? 'Yes' : 'No') . "</>");
+        $this->line("  Test Scripts: <fg=white>" . ($options->includeTestScripts ? 'Yes' : 'No') . "</>");
+        $this->line("  Example Responses: <fg=white>" . ($options->includeExampleResponses ? 'Yes' : 'No') . "</>");
+        $this->line("  Factory Data: <fg=white>" . ($options->includeFactoryData ? 'Yes' : 'No') . "</>");
 
         $this->newLine();
-        $this->line('<fg=yellow>Next Steps:</>');
-        $this->line("  1. Import the collection into Postman");
-        $this->line("  2. Import the environment file (if generated)");
-        $this->line("  3. Set the <fg=cyan>base_url</> variable in your environment");
+        $this->line('<fg=yellow>Zero-Config Setup:</>');
+        $this->line("  1. Import the collection + environment into Postman");
+        $this->line("  2. Select the environment from the dropdown");
+        $this->line("  3. <fg=green>Start making requests - base_url is pre-configured!</>");
 
         if (config('postman-generator.documentation.enabled', true)) {
             $docRoute = config('postman-generator.documentation.route', 'api-documentation');
@@ -293,6 +305,10 @@ class GeneratePostmanCollectionCommand extends Command
             $this->line("  Token will be automatically stored in <fg=cyan>auth_token</> variable");
             $this->line("  All authenticated requests will use this token automatically");
         }
+
+        $this->newLine();
+        $this->line('<fg=yellow>Other Commands:</>');
+        $this->line("  <fg=cyan>php artisan postman:diff</>  - Compare routes with last collection (API changelog)");
 
         $this->newLine();
         outro('Happy API testing!');

@@ -538,6 +538,88 @@
 
         .no-results h3 { font-size: 16px; color: var(--color-text-secondary); margin-bottom: 8px; }
 
+        /* ── cURL Block ── */
+        .curl-block {
+            margin-top: 16px;
+            position: relative;
+        }
+
+        .curl-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .curl-block-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.15s;
+        }
+
+        .copy-btn:hover { background: var(--color-primary); color: white; }
+        .copy-btn.copied { background: var(--color-get-bg); color: var(--color-get-text); }
+
+        .curl-code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* ── Response Example ── */
+        .response-block {
+            margin-top: 16px;
+        }
+
+        .response-code {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 300px;
+        }
+
+        .rate-limit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
         /* ── Footer ── */
         .footer {
             margin-left: var(--sidebar-width);
@@ -707,6 +789,11 @@
                     <span class="route-detail-value">Required (Bearer Token)</span>
                     @endif
 
+                    @if($route->rateLimitInfo)
+                    <span class="route-detail-label">Rate Limit</span>
+                    <span class="route-detail-value"><span class="rate-limit-badge">{{ $route->rateLimitInfo }}</span></span>
+                    @endif
+
                     @if(!empty($route->middleware))
                     <span class="route-detail-label">Middleware</span>
                     <span class="route-detail-value">
@@ -757,6 +844,33 @@
                         @endforeach
                     </tbody>
                 </table>
+                @endif
+
+                {{-- cURL Command --}}
+                @php $curlCmd = $route->toCurl(config('app.url', 'http://localhost:8000')); @endphp
+                <div class="curl-block">
+                    <div class="curl-block-header">
+                        <span class="curl-block-title">cURL</span>
+                        <button class="copy-btn" onclick="copyCurl(this, '{{ base64_encode($curlCmd) }}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre class="curl-code">{{ $curlCmd }}</pre>
+                </div>
+
+                {{-- Response Example --}}
+                @if(!empty($route->responseExample))
+                <div class="response-block">
+                    <div class="curl-block-header">
+                        <span class="curl-block-title">Example Response ({{ $route->getExpectedStatusCode() }})</span>
+                        <button class="copy-btn" onclick="copyCurl(this, '{{ base64_encode(json_encode($route->responseExample, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) }}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <pre class="response-code">{{ json_encode($route->responseExample, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>
+                </div>
                 @endif
             </div>
         </div>
@@ -898,6 +1012,20 @@
             searchInput.blur();
         }
     });
+
+    // ── Copy cURL / Response ──
+    window.copyCurl = function(btn, base64Content) {
+        const text = atob(base64Content);
+        navigator.clipboard.writeText(text).then(function() {
+            const original = btn.innerHTML;
+            btn.classList.add('copied');
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+            setTimeout(function() {
+                btn.innerHTML = original;
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    };
 
     // ── Helper ──
     function escapeHtml(text) {
