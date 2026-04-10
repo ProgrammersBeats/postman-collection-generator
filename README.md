@@ -1,10 +1,17 @@
-# Laravel Postman Collection Generator
+<p align="center">
+  <img src="src/assets/images/banner.png" alt="Laravel Postman Collection Generator" width="100%">
+</p>
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/programmersbeats/postman-generator.svg?style=flat-square)](https://packagist.org/packages/programmersbeats/postman-generator)
-[![Total Downloads](https://img.shields.io/packagist/dt/programmersbeats/postman-generator.svg?style=flat-square)](https://packagist.org/packages/programmersbeats/postman-generator)
-[![License](https://img.shields.io/packagist/l/programmersbeats/postman-generator.svg?style=flat-square)](https://packagist.org/packages/programmersbeats/postman-generator)
+<p align="center">
+  <a href="https://packagist.org/packages/programmersbeats/postman-generator"><img src="https://img.shields.io/packagist/v/programmersbeats/postman-generator.svg?style=flat-square" alt="Latest Version on Packagist"></a>
+  <a href="https://packagist.org/packages/programmersbeats/postman-generator"><img src="https://img.shields.io/packagist/dt/programmersbeats/postman-generator.svg?style=flat-square" alt="Total Downloads"></a>
+  <a href="https://packagist.org/packages/programmersbeats/postman-generator"><img src="https://img.shields.io/packagist/l/programmersbeats/postman-generator.svg?style=flat-square" alt="License"></a>
+</p>
 
-The most advanced Laravel Postman collection generator. **Import and start testing immediately** - zero manual configuration required.
+<p align="center">
+  The most advanced Laravel Postman collection generator.<br>
+  <strong>Import and start testing immediately</strong> - zero manual configuration required.
+</p>
 
 ## Why This Package?
 
