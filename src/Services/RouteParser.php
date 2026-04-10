@@ -19,10 +19,13 @@ class RouteParser implements RouteParserInterface
     protected array $authMiddleware = ['auth', 'auth:sanctum', 'auth:api', 'auth:web'];
     protected array $loginRoutePatterns = ['login', 'auth.login', 'api.login'];
     protected array $logoutRoutePatterns = ['logout', 'auth.logout', 'api.logout'];
+    protected RouteFileDetector $fileDetector;
 
     public function __construct(
         protected Router $router,
-    ) {}
+    ) {
+        $this->fileDetector = new RouteFileDetector();
+    }
 
     /**
      * Parse all registered routes and return a collection of ParsedRoute DTOs.
@@ -98,6 +101,9 @@ class RouteParser implements RouteParserInterface
         $isLoginRoute = $this->checkIsLoginRoute($route);
         $isLogoutRoute = $this->checkIsLogoutRoute($route);
 
+        // Detect which route file this route belongs to
+        $sourceFileInfo = $this->fileDetector->getSourceFile($controller);
+
         return new ParsedRoute(
             uri: $route->uri(),
             methods: $route->methods(),
@@ -116,6 +122,8 @@ class RouteParser implements RouteParserInterface
             responseResourceClass: $this->extractResponseResource($controller, $action),
             modelClass: $this->extractModelClass($controller, $action),
             rateLimitInfo: $this->extractRateLimitInfo($middleware),
+            sourceFile: $sourceFileInfo['relative'] ?? null,
+            sourceFileName: $sourceFileInfo['name'] ?? null,
         );
     }
 

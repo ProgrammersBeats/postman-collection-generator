@@ -50,7 +50,7 @@ return [
         'type' => 'bearer',
 
         // Token variable name in Postman environment
-        'token_variable' => 'auth_token',
+        'token_variable' => 'Bearer',
 
         // Routes that provide authentication tokens (login endpoints)
         'login_routes' => [
@@ -95,6 +95,26 @@ return [
         // Token refresh endpoint (if applicable)
         'refresh_route' => null,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Route File Names (Multi-File Support)
+    |--------------------------------------------------------------------------
+    |
+    | When your app has multiple route files (api.php, candidate.php, etc.),
+    | the package auto-detects them from bootstrap/app.php and creates
+    | top-level folders in the collection. Customize folder names here.
+    |
+    | Example:
+    |   'route_files' => [
+    |       'routes/api.php'       => 'Admin APIs',
+    |       'routes/candidate.php' => 'Candidate APIs',
+    |       'routes/public.php'    => 'Public APIs',
+    |   ],
+    |
+    */
+
+    'route_files' => [],
 
     /*
     |--------------------------------------------------------------------------
@@ -143,7 +163,7 @@ return [
         // Pre-request script for authenticated routes
         'auth_pre_request' => <<<'JAVASCRIPT'
 // Auto-set Bearer token from environment
-const token = pm.environment.get("auth_token");
+const token = pm.environment.get("Bearer");
 if (token) {
     pm.request.headers.add({
         key: "Authorization",
@@ -159,8 +179,9 @@ if (tokenExpiry && new Date() > new Date(tokenExpiry)) {
 JAVASCRIPT,
 
         // Post-response script for login routes to store token
+        // Uses collectionVariables so no separate environment file is needed
         'login_post_response' => <<<'JAVASCRIPT'
-// Store authentication token from response
+// Store authentication token from response (single-file, no env needed)
 if (pm.response.code === 200 || pm.response.code === 201) {
     const response = pm.response.json();
 
@@ -172,14 +193,14 @@ if (pm.response.code === 200 || pm.response.code === 201) {
         || (response.user && response.user.token);
 
     if (token) {
-        pm.environment.set("auth_token", token);
-        console.log("✓ Token stored successfully");
+        pm.collectionVariables.set("Bearer", token);
+        console.log("Token stored successfully in collection variables");
 
         // Store expiry if available
         const expiresIn = response.expires_in || response.ttl;
         if (expiresIn) {
             const expiry = new Date(Date.now() + (expiresIn * 1000));
-            pm.environment.set("token_expiry", expiry.toISOString());
+            pm.collectionVariables.set("token_expiry", expiry.toISOString());
         }
     } else {
         console.warn("No token found in response");
@@ -191,9 +212,9 @@ JAVASCRIPT,
         'logout_post_response' => <<<'JAVASCRIPT'
 // Clear authentication token after logout
 if (pm.response.code === 200 || pm.response.code === 204) {
-    pm.environment.unset("auth_token");
-    pm.environment.unset("token_expiry");
-    console.log("✓ Token cleared successfully");
+    pm.collectionVariables.set("Bearer", "");
+    pm.collectionVariables.set("token_expiry", "");
+    console.log("Token cleared successfully");
 }
 JAVASCRIPT,
     ],
@@ -347,7 +368,7 @@ JAVASCRIPT,
         // Environment variables to include
         'environment_variables' => [
             'base_url' => 'http://localhost:8000/api',
-            'auth_token' => '',
+            'Bearer' => '',
             'token_expiry' => '',
         ],
     ],

@@ -34,6 +34,8 @@ class ParsedRoute
         public readonly ?string $modelClass = null,
         public readonly array $responseExample = [],
         public readonly ?string $rateLimitInfo = null,
+        public readonly ?string $sourceFile = null,
+        public readonly ?string $sourceFileName = null,
     ) {}
 
     /**
@@ -226,6 +228,8 @@ class ParsedRoute
             'model_class' => $this->modelClass,
             'response_example' => $this->responseExample,
             'rate_limit_info' => $this->rateLimitInfo,
+            'source_file' => $this->sourceFile,
+            'source_file_name' => $this->sourceFileName,
         ];
     }
 }

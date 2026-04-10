@@ -41,7 +41,7 @@ class PostmanCollection
             'bearer' => [
                 [
                     'key' => 'token',
-                    'value' => '{{auth_token}}',
+                    'value' => '{{Bearer}}',
                     'type' => 'string',
                 ],
             ],
@@ -58,10 +58,29 @@ class PostmanCollection
             ];
         }
 
+        // Embed all environment variables directly in the collection
+        // No separate environment file needed - everything in one file
+        $appUrl = rtrim(config('app.url', 'http://localhost:8000'), '/');
+
         $variable = [
             [
                 'key' => 'base_url',
-                'value' => '{{base_url}}',
+                'value' => $appUrl . '/api',
+                'type' => 'string',
+            ],
+            [
+                'key' => 'app_url',
+                'value' => $appUrl,
+                'type' => 'string',
+            ],
+            [
+                'key' => 'Bearer',
+                'value' => '',
+                'type' => 'string',
+            ],
+            [
+                'key' => 'token_expiry',
+                'value' => '',
                 'type' => 'string',
             ],
         ];
@@ -85,32 +104,29 @@ class PostmanCollection
     protected static function getCollectionPreRequestScript(): array
     {
         return [
-            '// Laravel Postman Generator - Collection Pre-Request Script',
-            '// This script automatically handles Sanctum/Bearer token authentication',
+            '// Laravel Postman Generator - Zero-Config Pre-Request Script',
+            '// Works with collection variables - no separate environment file needed',
             '',
             '(function() {',
-            '    // Get stored auth token',
-            '    const token = pm.environment.get("auth_token");',
+            '    // Try collection variable first, then environment variable',
+            '    const token = pm.collectionVariables.get("Bearer") || pm.environment.get("Bearer");',
             '    ',
             '    if (token) {',
-            '        // Set Authorization header if token exists',
             '        pm.request.headers.upsert({',
             '            key: "Authorization",',
             '            value: "Bearer " + token',
             '        });',
             '        ',
-            '        // Check token expiry',
-            '        const tokenExpiry = pm.environment.get("token_expiry");',
+            '        const tokenExpiry = pm.collectionVariables.get("token_expiry") || pm.environment.get("token_expiry");',
             '        if (tokenExpiry) {',
             '            const expiryDate = new Date(tokenExpiry);',
             '            const now = new Date();',
-            '            ',
             '            if (now > expiryDate) {',
-            '                console.warn("⚠️ Token appears to be expired. Please re-authenticate.");',
+            '                console.warn("Token appears to be expired. Please re-authenticate.");',
             '            } else {',
             '                const minutesLeft = Math.round((expiryDate - now) / 60000);',
             '                if (minutesLeft < 10) {',
-            '                    console.warn("⚠️ Token expires in " + minutesLeft + " minutes");',
+            '                    console.warn("Token expires in " + minutesLeft + " minutes");',
             '                }',
             '            }',
             '        }',

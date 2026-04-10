@@ -7,7 +7,7 @@
 // Clear authentication token after logout
 if (pm.response.code === 200 || pm.response.code === 204 || pm.response.code === 201) {
     // Clear token
-    pm.environment.unset("auth_token");
+    pm.environment.unset("Bearer");
     console.log("✓ Token cleared");
     
     // Clear expiry

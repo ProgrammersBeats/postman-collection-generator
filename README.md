@@ -173,7 +173,7 @@ The environment file uses your actual `APP_URL` - no manual editing needed.
     "name": "My API Environment",
     "values": [
         { "key": "base_url", "value": "http://your-app.test/api" },
-        { "key": "auth_token", "value": "" },
+        { "key": "Bearer", "value": "" },
         { "key": "token_expiry", "value": "" },
         { "key": "app_url", "value": "http://your-app.test" }
     ]

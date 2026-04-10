@@ -87,12 +87,17 @@ class GeneratePostmanCollectionCommand extends Command
             'Generating Postman collection...'
         );
 
-        // Determine output path
+        // Determine output path with auto-versioning
+        // Format: ProjectName-Year-vN (e.g., Neorecruits-2026-v1, Neorecruits-2026-v2)
         $outputPath = $options->outputPath ?? config('postman-generator.output_path', storage_path('postman'));
-        $filename = Str::slug($options->collectionName) . '.postman_collection.json';
+        $year = date('Y');
+        $slugName = Str::slug($options->collectionName);
+        $version = $this->getNextVersion($outputPath, $slugName, $year);
+
+        $filename = "{$slugName}-{$year}-v{$version}.postman_collection.json";
         $fullPath = rtrim($outputPath, '/') . '/' . $filename;
 
-        // Export the collection
+        // Export the single collection file (includes everything - no env file needed)
         $exportedPath = spin(
             fn() => $this->generator->export($collection, $fullPath),
             'Exporting collection to file...'
@@ -100,19 +105,6 @@ class GeneratePostmanCollectionCommand extends Command
 
         $this->newLine();
         info("Collection exported to: {$exportedPath}");
-
-        // Generate environment file if requested
-        if ($options->includeEnvironment) {
-            $envFilename = Str::slug($options->collectionName) . '.postman_environment.json';
-            $envPath = rtrim($outputPath, '/') . '/' . $envFilename;
-
-            $environment = $this->generator->generateEnvironment($options->collectionName);
-
-            if ($this->generator instanceof CollectionGenerator) {
-                $this->generator->exportEnvironment($environment, $envPath);
-                info("Environment exported to: {$envPath}");
-            }
-        }
 
         // Display summary
         $this->displaySummary($options, $exportedPath);
@@ -176,7 +168,7 @@ class GeneratePostmanCollectionCommand extends Command
         $includeEnvironment = $this->option('with-env') || confirm(
             label: 'Generate environment file?',
             default: true,
-            hint: 'Creates a separate environment file with base_url and auth_token variables',
+            hint: 'Creates a separate environment file with base_url and Bearer variables',
         );
 
         // Output path
@@ -265,6 +257,33 @@ class GeneratePostmanCollectionCommand extends Command
     }
 
     /**
+     * Get the next version number for auto-versioned filenames.
+     * Scans existing files: project-2026-v1, project-2026-v2, etc.
+     */
+    protected function getNextVersion(string $outputPath, string $slugName, string $year): int
+    {
+        if (!File::isDirectory($outputPath)) {
+            return 1;
+        }
+
+        $existing = File::glob($outputPath . "/{$slugName}-{$year}-v*.postman_collection.json");
+
+        if (empty($existing)) {
+            return 1;
+        }
+
+        $maxVersion = 0;
+        foreach ($existing as $file) {
+            $basename = pathinfo($file, PATHINFO_FILENAME);
+            if (preg_match("/-v(\d+)\./", $basename, $match)) {
+                $maxVersion = max($maxVersion, (int) $match[1]);
+            }
+        }
+
+        return $maxVersion + 1;
+    }
+
+    /**
      * Display summary after generation.
      */
     protected function displaySummary(GeneratorOptions $options, string $path): void
@@ -301,7 +320,7 @@ class GeneratePostmanCollectionCommand extends Command
             $this->newLine();
             $this->line('<fg=yellow>Authentication:</>');
             $this->line("  Call a login endpoint first");
-            $this->line("  Token will be automatically stored in <fg=cyan>auth_token</> variable");
+            $this->line("  Token will be automatically stored in <fg=cyan>Bearer</> variable");
             $this->line("  All authenticated requests will use this token automatically");
         }
 

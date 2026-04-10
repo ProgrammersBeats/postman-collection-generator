@@ -6,7 +6,7 @@
 
 (function() {
     // Get stored auth token
-    const token = pm.environment.get("auth_token");
+    const token = pm.environment.get("Bearer");
     
     if (token) {
         // Set Authorization header if token exists

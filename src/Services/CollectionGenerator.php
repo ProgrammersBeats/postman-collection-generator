@@ -37,6 +37,9 @@ class CollectionGenerator implements CollectionGeneratorInterface
 
     /**
      * Generate a Postman collection from parsed routes.
+     *
+     * When multiple route files are detected (api.php, candidate.php, etc.),
+     * routes are grouped under top-level folders named after their source file.
      */
     public function generate(GeneratorOptions $options): PostmanCollection
     {
@@ -44,8 +47,18 @@ class CollectionGenerator implements CollectionGeneratorInterface
         $routes = $this->routeParser->filter($routes);
 
         $strategy = $this->getStrategy($options->groupingStrategy);
-        $groupedRoutes = $strategy->group($routes);
-        $items = $this->buildItems($groupedRoutes, $options, $strategy);
+
+        // Check if routes come from multiple files
+        $sourceFiles = $routes->pluck('sourceFileName')->filter()->unique();
+        $hasMultipleFiles = $sourceFiles->count() > 1;
+
+        if ($hasMultipleFiles) {
+            // Group by source file first, then by strategy within each file
+            $items = $this->buildMultiFileItems($routes, $options, $strategy);
+        } else {
+            $groupedRoutes = $strategy->group($routes);
+            $items = $this->buildItems($groupedRoutes, $options, $strategy);
+        }
 
         return PostmanCollection::create(
             name: $options->collectionName,
@@ -53,6 +66,61 @@ class CollectionGenerator implements CollectionGeneratorInterface
             items: $items,
             includeBearer: $options->includeBearer,
         );
+    }
+
+    /**
+     * Build items grouped by source file as top-level folders.
+     * e.g., "Api" folder, "Candidate" folder, "Public" folder
+     */
+    protected function buildMultiFileItems($routes, GeneratorOptions $options, GroupingStrategyInterface $strategy): array
+    {
+        $items = [];
+
+        // Group routes by source file
+        $byFile = [];
+        $noFile = [];
+
+        foreach ($routes as $route) {
+            $fileName = $route->sourceFileName;
+            if ($fileName) {
+                $byFile[$fileName][] = $route;
+            } else {
+                $noFile[] = $route;
+            }
+        }
+
+        ksort($byFile);
+
+        // Build each source file as a top-level folder
+        foreach ($byFile as $fileName => $fileRoutes) {
+            $collection = collect($fileRoutes);
+            $groupedRoutes = $strategy->group($collection);
+            $childItems = $this->buildItems($groupedRoutes, $options, $strategy);
+
+            $authCount = count(array_filter($fileRoutes, fn($r) => $r->requiresAuth));
+            $totalCount = count($fileRoutes);
+
+            $items[] = [
+                'name' => $fileName . ' APIs',
+                'description' => "Routes from {$fileName} ({$totalCount} endpoints, {$authCount} require authentication)",
+                'item' => $childItems,
+            ];
+        }
+
+        // Add ungrouped routes
+        if (!empty($noFile)) {
+            $collection = collect($noFile);
+            $groupedRoutes = $strategy->group($collection);
+            $childItems = $this->buildItems($groupedRoutes, $options, $strategy);
+
+            $items[] = [
+                'name' => 'Other APIs',
+                'description' => 'Routes without a detected source file',
+                'item' => $childItems,
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -91,7 +159,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
                 'enabled' => true,
             ],
             [
-                'key' => 'auth_token',
+                'key' => 'Bearer',
                 'value' => '',
                 'type' => 'secret',
                 'enabled' => true,
@@ -323,7 +391,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
                 'bearer' => [
                     [
                         'key' => 'token',
-                        'value' => '{{auth_token}}',
+                        'value' => '{{Bearer}}',
                         'type' => 'string',
                     ],
                 ],
@@ -509,8 +577,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
                     'type' => 'text/javascript',
                     'exec' => [
                         '// This request requires authentication',
-                        '// Token is automatically set from collection-level pre-request script',
-                        'const token = pm.environment.get("auth_token");',
+                        'const token = pm.collectionVariables.get("Bearer") || pm.environment.get("Bearer");',
                         'if (!token) {',
                         '    console.warn("No auth token found. Please authenticate first.");',
                         '}',
@@ -574,7 +641,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $description .= "\n### Authentication\n\n";
             $description .= "This collection uses Bearer token authentication with Laravel Sanctum.\n\n";
             $description .= "1. Call the login endpoint first\n";
-            $description .= "2. The token will be automatically stored in the `auth_token` environment variable\n";
+            $description .= "2. The token will be automatically stored in the `Bearer` environment variable\n";
             $description .= "3. All authenticated endpoints will automatically use this token\n";
         }
 

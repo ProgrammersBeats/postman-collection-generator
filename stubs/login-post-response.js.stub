@@ -17,7 +17,7 @@ if (pm.response.code === 200 || pm.response.code === 201) {
         || (response.user && response.user.token);
     
     if (token) {
-        pm.environment.set("auth_token", token);
+        pm.environment.set("Bearer", token);
         console.log("✓ Token stored successfully");
         
         // Store user info if available
