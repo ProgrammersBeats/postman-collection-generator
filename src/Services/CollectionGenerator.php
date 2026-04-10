@@ -465,9 +465,18 @@ class CollectionGenerator implements CollectionGeneratorInterface
         // Build formdata entries from the sample body
         $formdata = [];
         foreach ($sampleBody as $key => $value) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            } elseif (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            } elseif (is_null($value)) {
+                $value = '';
+            } else {
+                $value = (string) $value;
+            }
             $formdata[] = [
                 'key' => $key,
-                'value' => is_bool($value) ? ($value ? 'true' : 'false') : (string) ($value ?? ''),
+                'value' => $value,
                 'type' => 'text',
             ];
         }
