@@ -33,7 +33,6 @@ class GeneratePostmanCollectionCommand extends Command
                             {--output= : Output path for the collection file}
                             {--strategy= : Grouping strategy (prefix, controller, resource, name, middleware, tag)}
                             {--env : Also generate environment file}
-                            {--no-interaction : Skip interactive prompts and use defaults}
                             {--full : Generate full descriptive collection with all documentation}
                             {--minimal : Generate minimal collection without extra documentation}
                             {--no-tests : Disable auto-generated test scripts}
