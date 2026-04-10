@@ -51,11 +51,18 @@ php artisan vendor:publish --tag=postman-generator-config
 ## Quick Start
 
 ```bash
-# Generate collection + environment (ready to import)
-php artisan postman:collection --Bearer --with-env --no-interaction
+# Generate a single collection file (ready to import)
+php artisan postman:collection --Bearer -n
 ```
 
-**That's it.** Import both files into Postman, select the environment, and start testing. The `base_url` is already set to your `APP_URL`.
+**That's it.** Import the single file into Postman and start testing. Everything is embedded - no separate environment file needed.
+
+Output files are auto-versioned:
+```
+storage/postman/neorecruits-api-2026-v1.postman_collection.json   (1st run)
+storage/postman/neorecruits-api-2026-v2.postman_collection.json   (2nd run)
+storage/postman/neorecruits-api-2026-v3.postman_collection.json   (3rd run)
+```
 
 Then visit **`http://your-app.test/api-documentation`** to view your docs in the browser.
 
@@ -164,23 +171,16 @@ The POST body becomes:
 
 Faker methods are mapped to realistic sample values (100+ methods supported). Disable with `--no-factory`.
 
-## Feature 4: Zero-Config Environment
+## Feature 4: Single File, Zero-Config
 
-The environment file uses your actual `APP_URL` - no manual editing needed.
+Everything is embedded in **one collection file** - no separate environment file needed. The collection includes your actual `APP_URL` as pre-configured variables:
 
-```json
-{
-    "name": "My API Environment",
-    "values": [
-        { "key": "base_url", "value": "http://your-app.test/api" },
-        { "key": "Bearer", "value": "" },
-        { "key": "token_expiry", "value": "" },
-        { "key": "app_url", "value": "http://your-app.test" }
-    ]
-}
-```
+- `{{base_url}}` - Auto-set to your `APP_URL/api`
+- `{{Bearer}}` - Token stored automatically after login
+- `{{token_expiry}}` - Token expiry tracking
+- `{{app_url}}` - Your application URL
 
-**Import -> Select environment -> Start testing.** No configuration steps.
+**Import one file -> Start testing.** No configuration steps.
 
 ## Feature 5: API Changelog (`postman:diff`)
 
@@ -309,31 +309,50 @@ Route::middleware('throttle:60,1')->group(function () {
 });
 ```
 
-## All Command Options
+## Command Flags
+
+### `php artisan postman:collection`
+
+| Flag | Description |
+|------|-------------|
+| `--Bearer` | Include Bearer token authentication with Sanctum pre-scripts |
+| `--name=NAME` | Set the collection name (default: your app name) |
+| `--output=PATH` | Set the output directory (default: `storage/postman`) |
+| `--strategy=STRATEGY` | Grouping strategy: `prefix`, `controller`, `resource`, `name`, `middleware`, `tag` |
+| `--full` | Full documentation mode with all details |
+| `--minimal` | Minimal mode - just routes, no extra documentation |
+| `--no-tests` | Disable auto-generated Postman test scripts |
+| `--no-responses` | Disable example response generation from API Resources |
+| `--no-factory` | Disable factory-based realistic sample data |
+| `-n` | Non-interactive mode, skip prompts and use defaults |
+
+### `php artisan postman:diff`
+
+| Flag | Description |
+|------|-------------|
+| `--collection=PATH` | Path to existing collection file to compare against |
+| `--output=PATH` | Save the diff report as a markdown file |
+
+### Examples
 
 ```bash
-php artisan postman:collection [options]
+# Full collection with Bearer auth (non-interactive)
+php artisan postman:collection --Bearer -n
 
-Options:
-  --Bearer              Include Bearer token auth with Sanctum pre-scripts
-  --name=NAME           Collection name
-  --output=PATH         Output directory
-  --strategy=STRATEGY   prefix, controller, resource, name, middleware, tag
-  --with-env                 Generate environment file (recommended)
-  --full                Full documentation mode
-  --minimal             Minimal mode (no docs)
-  --no-tests            Disable auto-generated test scripts
-  --no-responses        Disable example response generation
-  --no-factory          Disable factory-based sample data
-  --no-interaction      Skip prompts, use defaults
-```
+# Interactive mode - guided setup with prompts
+php artisan postman:collection
 
-```bash
-php artisan postman:diff [options]
+# Custom name and controller grouping
+php artisan postman:collection --Bearer --name="My API v2" --strategy=controller -n
 
-Options:
-  --collection=PATH     Path to existing collection to compare
-  --output=PATH         Save diff report as markdown
+# Minimal collection without test scripts
+php artisan postman:collection --Bearer --minimal --no-tests -n
+
+# Compare routes with last generated collection
+php artisan postman:diff
+
+# Save API changelog as markdown
+php artisan postman:diff --output=API-CHANGELOG.md
 ```
 
 ## Grouping Strategies
