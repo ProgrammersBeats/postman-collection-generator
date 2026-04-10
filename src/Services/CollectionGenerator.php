@@ -455,31 +455,49 @@ class CollectionGenerator implements CollectionGeneratorInterface
 
     /**
      * Build request body for POST/PUT/PATCH.
-     * Uses Factory data when available, then validation rules, then empty body.
+     * Priority: Factory data > Validation rules > Model/Controller inference.
+     * Includes both raw JSON and formdata modes.
      */
     protected function buildRequestBody(ParsedRoute $route, GeneratorOptions $options): array
     {
-        $body = [
-            'mode' => 'raw',
-            'raw' => '',
-            'options' => [
-                'raw' => [
-                    'language' => 'json',
-                ],
-            ],
-        ];
+        $sampleBody = $this->buildSampleFields($route, $options);
 
+        // Build formdata entries from the sample body
+        $formdata = [];
+        foreach ($sampleBody as $key => $value) {
+            $formdata[] = [
+                'key' => $key,
+                'value' => is_bool($value) ? ($value ? 'true' : 'false') : (string) ($value ?? ''),
+                'type' => 'text',
+            ];
+        }
+
+        return [
+            'mode' => 'raw',
+            'raw' => !empty($sampleBody)
+                ? json_encode($sampleBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                : "{\n    \n}",
+            'options' => [
+                'raw' => ['language' => 'json'],
+            ],
+            'formdata' => $formdata,
+        ];
+    }
+
+    /**
+     * Build sample fields from all available sources.
+     */
+    protected function buildSampleFields(ParsedRoute $route, GeneratorOptions $options): array
+    {
         $sampleBody = [];
 
-        // Try factory data first (most realistic)
+        // Source 1: Factory data (most realistic)
         if ($options->includeFactoryData && $route->modelClass) {
             $factoryData = $this->factoryDataGenerator->generate($route->modelClass);
             if (!empty($factoryData)) {
-                // Filter factory data to only include fields from validation rules if available
                 if (!empty($route->validationRules)) {
                     $ruleFields = array_keys($route->validationRules);
                     $sampleBody = array_intersect_key($factoryData, array_flip($ruleFields));
-                    // Add any validation fields not in factory
                     foreach ($ruleFields as $field) {
                         if (!isset($sampleBody[$field])) {
                             $sampleBody[$field] = $this->getSampleValue($field, '');
@@ -491,18 +509,77 @@ class CollectionGenerator implements CollectionGeneratorInterface
             }
         }
 
-        // Fallback to validation rules
-        if (empty($sampleBody) && $options->includeValidationRules && !empty($route->validationRules)) {
+        // Source 2: Validation rules
+        if (empty($sampleBody) && !empty($route->validationRules)) {
             $sampleBody = $this->generateSampleBody($route->validationRules);
         }
 
-        if (!empty($sampleBody)) {
-            $body['raw'] = json_encode($sampleBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        } else {
-            $body['raw'] = "{\n    \n}";
+        // Source 3: Infer from controller/model name
+        if (empty($sampleBody)) {
+            $sampleBody = $this->inferFieldsFromRoute($route);
         }
 
-        return $body;
+        return $sampleBody;
+    }
+
+    /**
+     * Infer request body fields from the controller/model name when no other source is available.
+     */
+    protected function inferFieldsFromRoute(ParsedRoute $route): array
+    {
+        $controllerName = $route->getControllerName();
+        if (!$controllerName) {
+            $segments = explode('/', trim($route->uri, '/'));
+            $filtered = array_filter($segments, fn($s) => !preg_match('/^(api|v\d+|\{.+\})$/', $s));
+            $controllerName = Str::studly(Str::singular(end($filtered) ?: ''));
+        }
+        $baseName = strtolower(str_replace('Controller', '', $controllerName));
+
+        $fieldSets = [
+            'user' => ['name' => 'John Doe', 'email' => 'user@example.com', 'password' => 'password123', 'password_confirmation' => 'password123'],
+            'profile' => ['first_name' => 'John', 'last_name' => 'Doe', 'phone' => '+1234567890', 'bio' => 'Software developer'],
+            'login' => ['email' => 'user@example.com', 'password' => 'password123'],
+            'register' => ['name' => 'John Doe', 'email' => 'user@example.com', 'password' => 'password123', 'password_confirmation' => 'password123'],
+            'auth' => ['email' => 'user@example.com', 'password' => 'password123'],
+            'pin' => ['pin' => '1234'],
+            '2fa' => ['code' => '123456'],
+            'twofactor' => ['code' => '123456'],
+            'post' => ['title' => 'Sample Post', 'body' => 'Post content here.', 'status' => 'published'],
+            'comment' => ['body' => 'This is a comment.', 'post_id' => 1],
+            'category' => ['name' => 'Technology', 'slug' => 'technology', 'description' => 'Tech category'],
+            'product' => ['name' => 'Sample Product', 'price' => 29.99, 'description' => 'Product description', 'quantity' => 100],
+            'order' => ['product_id' => 1, 'quantity' => 1, 'payment_method' => 'card'],
+            'payment' => ['amount' => 99.99, 'currency' => 'USD', 'payment_method' => 'card'],
+            'job' => ['title' => 'Software Engineer', 'description' => 'Job description', 'location' => 'Remote', 'salary' => 80000],
+            'candidate' => ['first_name' => 'John', 'last_name' => 'Doe', 'email' => 'candidate@example.com', 'phone' => '+1234567890'],
+            'application' => ['job_id' => 1, 'cover_letter' => 'I am interested in this position.'],
+            'message' => ['subject' => 'Hello', 'body' => 'Message content.', 'receiver_id' => 1],
+            'notification' => ['title' => 'Notification', 'message' => 'Notification content', 'type' => 'info'],
+            'setting' => ['key' => 'setting_name', 'value' => 'setting_value'],
+            'address' => ['street' => '123 Main St', 'city' => 'New York', 'state' => 'NY', 'zip' => '10001', 'country' => 'US'],
+            'file' => ['file' => '(binary)', 'name' => 'document.pdf'],
+            'role' => ['name' => 'editor', 'permissions' => ['edit-posts', 'view-posts']],
+            'password' => ['current_password' => 'old_password', 'password' => 'new_password123', 'password_confirmation' => 'new_password123'],
+            'verify' => ['code' => '123456'],
+            'forgot' => ['email' => 'user@example.com'],
+            'reset' => ['email' => 'user@example.com', 'token' => 'reset_token', 'password' => 'new_password123', 'password_confirmation' => 'new_password123'],
+        ];
+
+        // Try exact match
+        if (isset($fieldSets[$baseName])) {
+            return $fieldSets[$baseName];
+        }
+
+        // Try URI-based inference
+        $uri = strtolower($route->uri);
+        foreach ($fieldSets as $key => $fields) {
+            if (Str::contains($uri, $key)) {
+                return $fields;
+            }
+        }
+
+        // Generic fallback
+        return ['name' => 'Sample Value', 'description' => 'Sample description'];
     }
 
     protected function generateSampleBody(array $rules): array

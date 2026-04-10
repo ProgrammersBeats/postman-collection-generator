@@ -620,6 +620,225 @@
             color: #92400e;
         }
 
+        /* ── API Tester ── */
+        .api-tester {
+            margin-top: 20px;
+            border-top: 1px solid var(--color-border);
+            padding-top: 16px;
+            display: none;
+        }
+
+        .api-tester.open { display: block; }
+
+        .api-tester-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .api-tester-url {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .api-tester-url input {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            outline: none;
+            background: var(--color-surface);
+        }
+
+        .api-tester-send {
+            padding: 8px 20px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: background 0.15s;
+        }
+
+        .api-tester-send:hover { background: #4f46e5; }
+        .api-tester-send:disabled { background: #94a3b8; cursor: wait; }
+
+        .api-tester-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 12px;
+        }
+
+        .api-tester-tab {
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-family: var(--font-sans);
+        }
+
+        .api-tester-tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .api-tester-auth {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .api-tester-auth label {
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+        }
+
+        .api-tester-auth input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            outline: none;
+        }
+
+        .api-tester-auth input:focus { border-color: var(--color-primary); }
+
+        .api-tester-body textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        .api-tester-body textarea:focus { border-color: var(--color-primary); }
+
+        .api-tester-formdata { margin-bottom: 12px; }
+
+        .api-tester-formdata-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+            align-items: center;
+        }
+
+        .api-tester-formdata-row input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            outline: none;
+        }
+
+        .api-tester-formdata-row button {
+            padding: 4px 8px;
+            background: none;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--color-delete);
+            font-size: 14px;
+        }
+
+        .api-tester-add-row {
+            padding: 4px 12px;
+            background: var(--color-border-light);
+            border: 1px dashed var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--color-text-muted);
+            font-family: var(--font-sans);
+        }
+
+        .api-tester-response {
+            margin-top: 12px;
+        }
+
+        .api-tester-response-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .api-tester-status {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            font-family: var(--font-mono);
+        }
+
+        .api-tester-status.success { background: var(--color-get-bg); color: var(--color-get-text); }
+        .api-tester-status.error { background: var(--color-delete-bg); color: var(--color-delete-text); }
+        .api-tester-status.warning { background: var(--color-put-bg); color: var(--color-put-text); }
+
+        .api-tester-time {
+            font-size: 12px;
+            color: var(--color-text-muted);
+        }
+
+        .api-tester-response-body {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .try-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 14px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.15s;
+        }
+
+        .try-btn:hover { background: #4f46e5; }
+
         /* ── Footer ── */
         .footer {
             margin-left: var(--sidebar-width);
@@ -872,6 +1091,91 @@
                     <pre class="response-code">{{ json_encode($route->responseExample, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</pre>
                 </div>
                 @endif
+
+                {{-- Try It Button --}}
+                @php
+                    $testerId = 'tester-' . md5($route->uri . $route->getPrimaryMethod());
+                    $appUrl = rtrim(config('app.url', 'http://localhost:8000'), '/');
+                    $fullUrl = $appUrl . '/' . ltrim($uri, '/');
+                    $sampleBody = [];
+                    if (!empty($route->validationRules)) {
+                        foreach ($route->validationRules as $f => $r) {
+                            if (!str_contains($f, '.')) $sampleBody[$f] = 'sample_value';
+                        }
+                    }
+                    if (!empty($route->responseExample['data']) && is_array($route->responseExample['data'])) {
+                        $respData = $route->responseExample['data'];
+                        if (isset($respData[0])) $respData = $respData[0];
+                        foreach ($respData as $f => $v) {
+                            if (!in_array($f, ['id','created_at','updated_at','deleted_at','email_verified_at']) && !isset($sampleBody[$f])) {
+                                $sampleBody[$f] = $v;
+                            }
+                        }
+                    }
+                @endphp
+                <div style="margin-top: 16px;">
+                    <button class="try-btn" onclick="toggleTester('{{ $testerId }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Try It
+                    </button>
+                </div>
+
+                <div class="api-tester" id="{{ $testerId }}">
+                    {{-- URL Bar --}}
+                    <div class="api-tester-header">
+                        <span class="method-badge {{ $method }}" style="font-size:11px;">{{ strtoupper($method) }}</span>
+                        <div class="api-tester-url">
+                            <input type="text" id="{{ $testerId }}-url" value="{{ $fullUrl }}">
+                            <button class="api-tester-send" onclick="sendRequest('{{ $testerId }}', '{{ strtoupper($method) }}')">Send</button>
+                        </div>
+                    </div>
+
+                    {{-- Auth --}}
+                    <div class="api-tester-auth">
+                        <label>Bearer Token:</label>
+                        <input type="text" id="{{ $testerId }}-token" placeholder="Paste your token here (leave empty for public routes)">
+                    </div>
+
+                    {{-- Body Tabs (for POST/PUT/PATCH) --}}
+                    @if(in_array(strtoupper($method), ['POST', 'PUT', 'PATCH']))
+                    <div class="api-tester-tabs">
+                        <button class="api-tester-tab active" onclick="switchBodyTab('{{ $testerId }}', 'json', this)">Raw JSON</button>
+                        <button class="api-tester-tab" onclick="switchBodyTab('{{ $testerId }}', 'formdata', this)">Form Data</button>
+                    </div>
+
+                    <div id="{{ $testerId }}-json" class="api-tester-body">
+                        <textarea id="{{ $testerId }}-body">{{ !empty($sampleBody) ? json_encode($sampleBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : "{\n    \n}" }}</textarea>
+                    </div>
+
+                    <div id="{{ $testerId }}-formdata" class="api-tester-formdata" style="display:none;">
+                        @foreach($sampleBody as $field => $value)
+                        <div class="api-tester-formdata-row">
+                            <input type="text" value="{{ $field }}" placeholder="Key">
+                            <input type="text" value="{{ is_bool($value) ? ($value ? 'true' : 'false') : $value }}" placeholder="Value">
+                            <button onclick="this.parentElement.remove()">x</button>
+                        </div>
+                        @endforeach
+                        @if(empty($sampleBody))
+                        <div class="api-tester-formdata-row">
+                            <input type="text" placeholder="Key">
+                            <input type="text" placeholder="Value">
+                            <button onclick="this.parentElement.remove()">x</button>
+                        </div>
+                        @endif
+                        <button class="api-tester-add-row" onclick="addFormRow('{{ $testerId }}')">+ Add Field</button>
+                    </div>
+                    @endif
+
+                    {{-- Response Area --}}
+                    <div class="api-tester-response" id="{{ $testerId }}-response" style="display:none;">
+                        <div class="api-tester-response-header">
+                            <span class="curl-block-title">Response</span>
+                            <span class="api-tester-status" id="{{ $testerId }}-status"></span>
+                            <span class="api-tester-time" id="{{ $testerId }}-time"></span>
+                        </div>
+                        <pre class="api-tester-response-body" id="{{ $testerId }}-response-body"></pre>
+                    </div>
+                </div>
             </div>
         </div>
         @endforeach
@@ -1012,6 +1316,121 @@
             searchInput.blur();
         }
     });
+
+    // ── Toggle API Tester ──
+    window.toggleTester = function(id) {
+        const tester = document.getElementById(id);
+        tester.classList.toggle('open');
+    };
+
+    // ── Switch Body Tab (JSON / FormData) ──
+    window.switchBodyTab = function(id, mode, btn) {
+        const jsonEl = document.getElementById(id + '-json');
+        const formEl = document.getElementById(id + '-formdata');
+        const tabs = btn.parentElement.querySelectorAll('.api-tester-tab');
+
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+
+        if (mode === 'json') {
+            if (jsonEl) jsonEl.style.display = '';
+            if (formEl) formEl.style.display = 'none';
+        } else {
+            if (jsonEl) jsonEl.style.display = 'none';
+            if (formEl) formEl.style.display = '';
+        }
+    };
+
+    // ── Add Form Data Row ──
+    window.addFormRow = function(id) {
+        const container = document.getElementById(id + '-formdata');
+        const row = document.createElement('div');
+        row.className = 'api-tester-formdata-row';
+        row.innerHTML = '<input type="text" placeholder="Key"><input type="text" placeholder="Value"><button onclick="this.parentElement.remove()">x</button>';
+        container.insertBefore(row, container.querySelector('.api-tester-add-row'));
+    };
+
+    // ── Send API Request ──
+    window.sendRequest = async function(id, method) {
+        const urlInput = document.getElementById(id + '-url');
+        const tokenInput = document.getElementById(id + '-token');
+        const responseDiv = document.getElementById(id + '-response');
+        const statusEl = document.getElementById(id + '-status');
+        const timeEl = document.getElementById(id + '-time');
+        const bodyEl = document.getElementById(id + '-response-body');
+        const sendBtn = urlInput.parentElement.querySelector('.api-tester-send');
+
+        const url = urlInput.value;
+        const token = tokenInput ? tokenInput.value : '';
+
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+
+        const headers = {
+            'Accept': 'application/json',
+        };
+
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        }
+
+        const options = { method: method, headers: headers };
+
+        // Check if body tab is JSON or FormData
+        if (['POST', 'PUT', 'PATCH'].includes(method)) {
+            const jsonDiv = document.getElementById(id + '-json');
+            const formDiv = document.getElementById(id + '-formdata');
+
+            if (jsonDiv && jsonDiv.style.display !== 'none') {
+                const textarea = document.getElementById(id + '-body');
+                if (textarea && textarea.value.trim()) {
+                    headers['Content-Type'] = 'application/json';
+                    options.body = textarea.value;
+                }
+            } else if (formDiv && formDiv.style.display !== 'none') {
+                const formData = new FormData();
+                const rows = formDiv.querySelectorAll('.api-tester-formdata-row');
+                rows.forEach(function(row) {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs[0] && inputs[1] && inputs[0].value) {
+                        formData.append(inputs[0].value, inputs[1].value);
+                    }
+                });
+                options.body = formData;
+                // Don't set Content-Type for FormData - browser sets it with boundary
+            }
+        }
+
+        const startTime = performance.now();
+
+        try {
+            const response = await fetch(url, options);
+            const elapsed = Math.round(performance.now() - startTime);
+            const text = await response.text();
+
+            let formattedBody;
+            try {
+                formattedBody = JSON.stringify(JSON.parse(text), null, 2);
+            } catch (e) {
+                formattedBody = text;
+            }
+
+            statusEl.textContent = response.status + ' ' + response.statusText;
+            statusEl.className = 'api-tester-status ' + (response.ok ? 'success' : (response.status >= 500 ? 'error' : 'warning'));
+            timeEl.textContent = elapsed + 'ms';
+            bodyEl.textContent = formattedBody;
+            responseDiv.style.display = '';
+        } catch (err) {
+            statusEl.textContent = 'Error';
+            statusEl.className = 'api-tester-status error';
+            timeEl.textContent = '';
+            bodyEl.textContent = 'Request failed: ' + err.message + '\n\nMake sure CORS is enabled or you are on the same domain.';
+            responseDiv.style.display = '';
+        }
+
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send';
+    };
 
     // ── Copy cURL / Response ──
     window.copyCurl = function(btn, base64Content) {
