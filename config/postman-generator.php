@@ -367,7 +367,7 @@ JAVASCRIPT,
 
         // Environment variables to include
         'environment_variables' => [
-            'base_url' => 'http://localhost:8000/api',
+            'base_url' => 'http://localhost:8000',
             'Bearer' => '',
             'token_expiry' => '',
         ],

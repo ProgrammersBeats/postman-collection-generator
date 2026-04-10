@@ -65,7 +65,7 @@ class PostmanCollection
         $variable = [
             [
                 'key' => 'base_url',
-                'value' => $appUrl . '/api',
+                'value' => $appUrl,
                 'type' => 'string',
             ],
             [

@@ -149,7 +149,7 @@ class CollectionGenerator implements CollectionGeneratorInterface
     {
         // Auto-detect the base URL from the application config
         $appUrl = rtrim(config('app.url', 'http://localhost:8000'), '/');
-        $apiBaseUrl = $appUrl . '/api';
+        $apiBaseUrl = $appUrl;
 
         $values = [
             [

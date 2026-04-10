@@ -78,7 +78,7 @@ class ApiDocumentationController extends Controller
             'routeCount' => $routeCount,
             'authRouteCount' => $authRouteCount,
             'publicRouteCount' => $routeCount - $authRouteCount,
-            'baseUrl' => config('postman-generator.base_url', url('/api')),
+            'baseUrl' => config('postman-generator.base_url', url('/')),
             'methodCount' => $this->countByMethod($routes),
         ]);
     }
