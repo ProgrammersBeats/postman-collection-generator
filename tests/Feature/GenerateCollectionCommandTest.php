@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Tests\Feature;
+namespace AmeerHamzaAH\PostmanGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\File;
-use YourVendor\PostmanGenerator\Tests\TestCase;
+use AmeerHamzaAH\PostmanGenerator\Tests\TestCase;
 
 class GenerateCollectionCommandTest extends TestCase
 {

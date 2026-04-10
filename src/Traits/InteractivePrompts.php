@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Traits;
+namespace AmeerHamzaAH\PostmanGenerator\Traits;
 
 use Illuminate\Support\Str;
-use YourVendor\PostmanGenerator\DTOs\GeneratorOptions;
+use AmeerHamzaAH\PostmanGenerator\DTOs\GeneratorOptions;
 
 /**
  * Trait for handling interactive prompts with fallback for older Laravel versions.

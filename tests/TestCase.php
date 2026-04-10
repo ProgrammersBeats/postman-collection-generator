@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Tests;
+namespace AmeerHamzaAH\PostmanGenerator\Tests;
 
 use Orchestra\Testbench\TestCase as BaseTestCase;
-use YourVendor\PostmanGenerator\PostmanGeneratorServiceProvider;
+use AmeerHamzaAH\PostmanGenerator\PostmanGeneratorServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {

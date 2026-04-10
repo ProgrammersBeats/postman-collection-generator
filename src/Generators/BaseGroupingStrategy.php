@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Generators;
+namespace AmeerHamzaAH\PostmanGenerator\Generators;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use YourVendor\PostmanGenerator\Contracts\GroupingStrategyInterface;
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\Contracts\GroupingStrategyInterface;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
 
 abstract class BaseGroupingStrategy implements GroupingStrategyInterface
 {

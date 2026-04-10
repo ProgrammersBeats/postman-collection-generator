@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Services;
+namespace AmeerHamzaAH\PostmanGenerator\Services;
 
 use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
@@ -10,8 +10,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
-use YourVendor\PostmanGenerator\Contracts\RouteParserInterface;
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\Contracts\RouteParserInterface;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
 
 class RouteParser implements RouteParserInterface
 {

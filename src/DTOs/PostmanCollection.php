@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\DTOs;
+namespace AmeerHamzaAH\PostmanGenerator\DTOs;
 
 use Illuminate\Support\Str;
 

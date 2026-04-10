@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Services;
+namespace AmeerHamzaAH\PostmanGenerator\Services;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use YourVendor\PostmanGenerator\Contracts\CollectionGeneratorInterface;
-use YourVendor\PostmanGenerator\Contracts\GroupingStrategyInterface;
-use YourVendor\PostmanGenerator\Contracts\RouteParserInterface;
-use YourVendor\PostmanGenerator\DTOs\GeneratorOptions;
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
-use YourVendor\PostmanGenerator\DTOs\PostmanCollection;
-use YourVendor\PostmanGenerator\Generators\ControllerGroupingStrategy;
-use YourVendor\PostmanGenerator\Generators\MiddlewareGroupingStrategy;
-use YourVendor\PostmanGenerator\Generators\NameGroupingStrategy;
-use YourVendor\PostmanGenerator\Generators\PrefixGroupingStrategy;
-use YourVendor\PostmanGenerator\Generators\ResourceGroupingStrategy;
-use YourVendor\PostmanGenerator\Generators\TagGroupingStrategy;
+use AmeerHamzaAH\PostmanGenerator\Contracts\CollectionGeneratorInterface;
+use AmeerHamzaAH\PostmanGenerator\Contracts\GroupingStrategyInterface;
+use AmeerHamzaAH\PostmanGenerator\Contracts\RouteParserInterface;
+use AmeerHamzaAH\PostmanGenerator\DTOs\GeneratorOptions;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\DTOs\PostmanCollection;
+use AmeerHamzaAH\PostmanGenerator\Generators\ControllerGroupingStrategy;
+use AmeerHamzaAH\PostmanGenerator\Generators\MiddlewareGroupingStrategy;
+use AmeerHamzaAH\PostmanGenerator\Generators\NameGroupingStrategy;
+use AmeerHamzaAH\PostmanGenerator\Generators\PrefixGroupingStrategy;
+use AmeerHamzaAH\PostmanGenerator\Generators\ResourceGroupingStrategy;
+use AmeerHamzaAH\PostmanGenerator\Generators\TagGroupingStrategy;
 
 class CollectionGenerator implements CollectionGeneratorInterface
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Contracts;
+namespace AmeerHamzaAH\PostmanGenerator\Contracts;
 
 use Illuminate\Support\Collection;
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
 
 interface GroupingStrategyInterface
 {

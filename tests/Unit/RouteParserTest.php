@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Tests\Unit;
+namespace AmeerHamzaAH\PostmanGenerator\Tests\Unit;
 
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
-use YourVendor\PostmanGenerator\Services\RouteParser;
-use YourVendor\PostmanGenerator\Tests\TestCase;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\Services\RouteParser;
+use AmeerHamzaAH\PostmanGenerator\Tests\TestCase;
 
 class RouteParserTest extends TestCase
 {

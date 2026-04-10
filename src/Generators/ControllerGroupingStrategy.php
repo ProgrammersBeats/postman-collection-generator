@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Generators;
+namespace AmeerHamzaAH\PostmanGenerator\Generators;
 
 use Illuminate\Support\Str;
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
 
 class ControllerGroupingStrategy extends BaseGroupingStrategy
 {

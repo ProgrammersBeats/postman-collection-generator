@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Commands;
+namespace AmeerHamzaAH\PostmanGenerator\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use YourVendor\PostmanGenerator\Contracts\CollectionGeneratorInterface;
-use YourVendor\PostmanGenerator\DTOs\GeneratorOptions;
-use YourVendor\PostmanGenerator\Services\CollectionGenerator;
+use AmeerHamzaAH\PostmanGenerator\Contracts\CollectionGeneratorInterface;
+use AmeerHamzaAH\PostmanGenerator\DTOs\GeneratorOptions;
+use AmeerHamzaAH\PostmanGenerator\Services\CollectionGenerator;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;

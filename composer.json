@@ -1,6 +1,6 @@
 {
-    "name": "yourvendor/laravel-postman-generator",
-    "description": "Generate Postman collections from Laravel routes with Sanctum authentication support and multiple grouping strategies",
+    "name": "ameerhamza-ah/postman-generator",
+    "description": "Generate Postman collections from Laravel routes with nested folder structure, browser-based API documentation, Sanctum authentication support, and multiple grouping strategies",
     "keywords": [
         "laravel",
         "postman",
@@ -8,14 +8,16 @@
         "collection",
         "generator",
         "sanctum",
-        "documentation"
+        "documentation",
+        "api-documentation",
+        "nested-folders"
     ],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Your Name",
-            "email": "your@email.com"
+            "name": "Ameer Hamza",
+            "email": "ameerhamza.infoo@gmail.com"
         }
     ],
     "require": {
@@ -30,18 +32,18 @@
     },
     "autoload": {
         "psr-4": {
-            "YourVendor\\PostmanGenerator\\": "src/"
+            "AmeerHamzaAH\\PostmanGenerator\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "YourVendor\\PostmanGenerator\\Tests\\": "tests/"
+            "AmeerHamzaAH\\PostmanGenerator\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "YourVendor\\PostmanGenerator\\PostmanGeneratorServiceProvider"
+                "AmeerHamzaAH\\PostmanGenerator\\PostmanGeneratorServiceProvider"
             ]
         }
     },

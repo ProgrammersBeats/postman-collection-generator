@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator;
+namespace AmeerHamzaAH\PostmanGenerator;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use YourVendor\PostmanGenerator\Commands\GeneratePostmanCollectionCommand;
-use YourVendor\PostmanGenerator\Contracts\CollectionGeneratorInterface;
-use YourVendor\PostmanGenerator\Contracts\RouteParserInterface;
-use YourVendor\PostmanGenerator\Http\Controllers\ApiDocumentationController;
-use YourVendor\PostmanGenerator\Services\CollectionGenerator;
-use YourVendor\PostmanGenerator\Services\RouteParser;
+use AmeerHamzaAH\PostmanGenerator\Commands\GeneratePostmanCollectionCommand;
+use AmeerHamzaAH\PostmanGenerator\Contracts\CollectionGeneratorInterface;
+use AmeerHamzaAH\PostmanGenerator\Contracts\RouteParserInterface;
+use AmeerHamzaAH\PostmanGenerator\Http\Controllers\ApiDocumentationController;
+use AmeerHamzaAH\PostmanGenerator\Services\CollectionGenerator;
+use AmeerHamzaAH\PostmanGenerator\Services\RouteParser;
 
 class PostmanGeneratorServiceProvider extends ServiceProvider
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace YourVendor\PostmanGenerator\Generators;
+namespace AmeerHamzaAH\PostmanGenerator\Generators;
 
 use Illuminate\Support\Str;
 use ReflectionClass;
-use YourVendor\PostmanGenerator\DTOs\ParsedRoute;
+use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
 
 class TagGroupingStrategy extends BaseGroupingStrategy
 {
