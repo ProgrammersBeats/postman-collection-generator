@@ -38,7 +38,7 @@ class PostmanGeneratorServiceProvider extends ServiceProvider
         // Load views for the documentation page
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'postman-generator');
 
-        // Register the API documentation web route
+        // Register the API documentation route using loadRoutesFrom
         $this->registerDocumentationRoute();
 
         if ($this->app->runningInConsole()) {
@@ -63,10 +63,7 @@ class PostmanGeneratorServiceProvider extends ServiceProvider
 
     /**
      * Register the API documentation route.
-     *
-     * This route serves a beautiful browser-based documentation page
-     * that automatically discovers all registered routes from every
-     * route file (api.php, custom files registered in bootstrap/app.php, etc.).
+     * Uses booted callback to ensure routes are registered after the app is fully booted.
      */
     protected function registerDocumentationRoute(): void
     {
@@ -74,11 +71,14 @@ class PostmanGeneratorServiceProvider extends ServiceProvider
             return;
         }
 
-        $routePath = config('postman-generator.documentation.route', 'api-documentation');
-        $middleware = config('postman-generator.documentation.middleware', ['web']);
+        // Register route after app is booted to avoid 404 in Laravel 12/13
+        $this->app->booted(function () {
+            $routePath = config('postman-generator.documentation.route', 'api-documentation');
+            $middleware = config('postman-generator.documentation.middleware', ['web']);
 
-        Route::middleware($middleware)
-            ->get($routePath, ApiDocumentationController::class)
-            ->name('api.documentation');
+            Route::middleware($middleware)
+                ->get($routePath, ApiDocumentationController::class)
+                ->name('api.documentation');
+        });
     }
 }
