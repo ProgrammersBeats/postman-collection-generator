@@ -1,8 +1,8 @@
 # Laravel Postman Collection Generator
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/ameerhamza-ah/postman-generator.svg?style=flat-square)](https://packagist.org/packages/ameerhamza-ah/postman-generator)
-[![Total Downloads](https://img.shields.io/packagist/dt/ameerhamza-ah/postman-generator.svg?style=flat-square)](https://packagist.org/packages/ameerhamza-ah/postman-generator)
-[![License](https://img.shields.io/packagist/l/ameerhamza-ah/postman-generator.svg?style=flat-square)](https://packagist.org/packages/ameerhamza-ah/postman-generator)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/programmersbeats/postman-generator.svg?style=flat-square)](https://packagist.org/packages/programmersbeats/postman-generator)
+[![Total Downloads](https://img.shields.io/packagist/dt/programmersbeats/postman-generator.svg?style=flat-square)](https://packagist.org/packages/programmersbeats/postman-generator)
+[![License](https://img.shields.io/packagist/l/programmersbeats/postman-generator.svg?style=flat-square)](https://packagist.org/packages/programmersbeats/postman-generator)
 
 Generate beautiful Postman collections from your Laravel routes with **nested folder structure**, **browser-based API documentation**, **automatic Sanctum authentication**, and intelligent route grouping.
 
@@ -30,7 +30,7 @@ Generate beautiful Postman collections from your Laravel routes with **nested fo
 Install the package via Composer:
 
 ```bash
-composer require ameerhamza-ah/postman-generator --dev
+composer require programmersbeats/postman-generator --dev
 ```
 
 Publish the configuration file (optional):
@@ -474,11 +474,11 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Security
 
-If you discover any security-related issues, please email ameerhamza.infoo@gmail.com instead of using the issue tracker.
+If you discover any security-related issues, please email programmersbeats@gmail.com instead of using the issue tracker.
 
 ## License
 
@@ -486,5 +486,9 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 ## Credits
 
-- [Ameer Hamza](https://github.com/AmeerHamza-AH)
+- [Ameer Hamza](https://github.com/ProgrammersBeats)
 - [All Contributors](../../contributors)
+
+## Support
+
+If you find this package helpful, consider supporting [ProgrammersBeats](https://github.com/ProgrammersBeats) by starring the repository and sharing it with your network.
