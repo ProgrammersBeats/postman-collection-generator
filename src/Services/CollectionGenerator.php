@@ -357,13 +357,8 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $request['request']['body'] = $this->buildRequestBody($route, $options);
         }
 
-        // Build events (pre-request + test scripts)
+        // Build events (test scripts + login/logout handlers)
         $events = [];
-
-        // Pre-request script for authenticated routes
-        if ($route->requiresAuth && $options->includeBearer) {
-            $events = array_merge($events, $this->buildRequestEvents($route, $options));
-        }
 
         // Login post-response scripts
         if ($route->isLoginRoute) {
@@ -384,19 +379,9 @@ class CollectionGenerator implements CollectionGeneratorInterface
             $request['event'] = $events;
         }
 
-        // Auth inheritance
-        if ($route->requiresAuth) {
-            $request['request']['auth'] = [
-                'type' => 'bearer',
-                'bearer' => [
-                    [
-                        'key' => 'token',
-                        'value' => '{{Bearer}}',
-                        'type' => 'string',
-                    ],
-                ],
-            ];
-        }
+        // No request-level auth config - the pre-request script handles everything.
+        // Flow: Login → token stored in {{Bearer}} → pre-request script adds Authorization header.
+        // This prevents empty {{Bearer}} from overriding manually set tokens.
 
         // Example responses
         if ($options->includeExampleResponses) {
