@@ -1,0 +1,24 @@
+// Laravel Postman Generator - Logout Post-Response Script
+// This script clears the authentication token after logout
+//
+// Customize this script if you need additional cleanup
+// Publish stubs with: php artisan vendor:publish --tag=postman-generator-stubs
+
+// Clear authentication token after logout
+if (pm.response.code === 200 || pm.response.code === 204 || pm.response.code === 201) {
+    // Clear token
+    pm.environment.unset("auth_token");
+    console.log("✓ Token cleared");
+    
+    // Clear expiry
+    pm.environment.unset("token_expiry");
+    
+    // Clear user info if stored
+    pm.environment.unset("user_id");
+    pm.environment.unset("user_email");
+    
+    console.log("✓ Logout successful - all auth data cleared");
+} else {
+    console.warn("⚠️ Logout may have failed with status: " + pm.response.code);
+    console.log("Note: You may want to clear tokens manually");
+}

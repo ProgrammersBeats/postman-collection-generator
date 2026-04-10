@@ -1,0 +1,47 @@
+// Laravel Postman Generator - Login Post-Response Script
+// This script automatically stores the authentication token from login responses
+//
+// Customize this script to match your API's response format
+// Publish stubs with: php artisan vendor:publish --tag=postman-generator-stubs
+
+// Store authentication token from response
+if (pm.response.code === 200 || pm.response.code === 201) {
+    const response = pm.response.json();
+    
+    // Try multiple possible token locations
+    // Customize these paths to match your API response structure
+    let token = response.token 
+        || response.access_token 
+        || (response.data && response.data.token)
+        || (response.data && response.data.access_token)
+        || (response.user && response.user.token);
+    
+    if (token) {
+        pm.environment.set("auth_token", token);
+        console.log("✓ Token stored successfully");
+        
+        // Store user info if available
+        const user = response.user || response.data?.user;
+        if (user) {
+            pm.environment.set("user_id", user.id);
+            pm.environment.set("user_email", user.email);
+            console.log("✓ User info stored: " + user.email);
+        }
+        
+        // Store expiry if available
+        const expiresIn = response.expires_in 
+            || response.ttl 
+            || response.data?.expires_in;
+        
+        if (expiresIn) {
+            const expiry = new Date(Date.now() + (expiresIn * 1000));
+            pm.environment.set("token_expiry", expiry.toISOString());
+            console.log("✓ Token expires at: " + expiry.toLocaleString());
+        }
+    } else {
+        console.warn("⚠️ No token found in response");
+        console.log("Response structure:", JSON.stringify(response, null, 2));
+    }
+} else {
+    console.error("❌ Login failed with status: " + pm.response.code);
+}
