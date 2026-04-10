@@ -646,9 +646,9 @@ class CollectionGenerator implements CollectionGeneratorInterface
         }
 
         $description .= "\n### Quick Start\n\n";
-        $description .= "1. Import this collection and the environment file\n";
-        $description .= "2. Select the environment from the dropdown\n";
-        $description .= "3. The `base_url` is pre-configured - start making requests!\n";
+        $description .= "1. Import this single collection file into Postman\n";
+        $description .= "2. Start making requests - `base_url` is pre-configured!\n";
+        $description .= "3. No separate environment file needed - everything is embedded\n";
 
         return $description;
     }

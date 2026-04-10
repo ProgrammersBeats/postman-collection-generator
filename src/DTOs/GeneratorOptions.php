@@ -12,7 +12,6 @@ class GeneratorOptions
         public readonly string $groupingStrategy,
         public readonly bool $includeBearer,
         public readonly bool $fullDescriptive,
-        public readonly bool $includeEnvironment,
         public readonly bool $includeMiddlewareInfo,
         public readonly bool $includeValidationRules,
         public readonly bool $includePHPDoc,
@@ -25,9 +24,6 @@ class GeneratorOptions
         public readonly bool $includeFactoryData = true,
     ) {}
 
-    /**
-     * Create options from array of values.
-     */
     public static function fromArray(array $options): self
     {
         return new self(
@@ -36,7 +32,6 @@ class GeneratorOptions
             groupingStrategy: $options['grouping_strategy'] ?? config('postman-generator.grouping.default', 'prefix'),
             includeBearer: $options['include_bearer'] ?? true,
             fullDescriptive: $options['full_descriptive'] ?? true,
-            includeEnvironment: $options['include_environment'] ?? true,
             includeMiddlewareInfo: $options['include_middleware'] ?? config('postman-generator.documentation.include_middleware', true),
             includeValidationRules: $options['include_validation_rules'] ?? config('postman-generator.documentation.include_validation_rules', true),
             includePHPDoc: $options['include_phpdoc'] ?? config('postman-generator.documentation.include_phpdoc', true),
@@ -50,9 +45,6 @@ class GeneratorOptions
         );
     }
 
-    /**
-     * Convert to array.
-     */
     public function toArray(): array
     {
         return [
@@ -61,7 +53,6 @@ class GeneratorOptions
             'grouping_strategy' => $this->groupingStrategy,
             'include_bearer' => $this->includeBearer,
             'full_descriptive' => $this->fullDescriptive,
-            'include_environment' => $this->includeEnvironment,
             'include_middleware' => $this->includeMiddlewareInfo,
             'include_validation_rules' => $this->includeValidationRules,
             'include_phpdoc' => $this->includePHPDoc,
