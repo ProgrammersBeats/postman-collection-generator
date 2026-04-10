@@ -69,7 +69,7 @@ class GenerateCollectionCommandTest extends TestCase
     {
         $this->artisan('postman:collection', [
             '--no-interaction' => true,
-            '--env' => true,
+            '--with-env' => true,
             '--name' => 'Env Test',
         ])
             ->assertSuccessful();

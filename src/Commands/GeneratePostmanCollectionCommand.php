@@ -32,7 +32,7 @@ class GeneratePostmanCollectionCommand extends Command
                             {--name= : Collection name}
                             {--output= : Output path for the collection file}
                             {--strategy= : Grouping strategy (prefix, controller, resource, name, middleware, tag)}
-                            {--env : Also generate environment file}
+                            {--with-env : Also generate environment file}
                             {--full : Generate full descriptive collection with all documentation}
                             {--minimal : Generate minimal collection without extra documentation}
                             {--no-tests : Disable auto-generated test scripts}
@@ -173,7 +173,7 @@ class GeneratePostmanCollectionCommand extends Command
         );
 
         // Environment file
-        $includeEnvironment = $this->option('env') || confirm(
+        $includeEnvironment = $this->option('with-env') || confirm(
             label: 'Generate environment file?',
             default: true,
             hint: 'Creates a separate environment file with base_url and auth_token variables',
@@ -252,7 +252,7 @@ class GeneratePostmanCollectionCommand extends Command
             'grouping_strategy' => $this->option('strategy') ?? config('postman-generator.grouping.default', 'prefix'),
             'include_bearer' => $this->option('Bearer'),
             'full_descriptive' => $isFull || !$isMinimal,
-            'include_environment' => $this->option('env'),
+            'include_environment' => $this->option('with-env'),
             'include_middleware' => !$isMinimal,
             'include_validation_rules' => !$isMinimal,
             'include_phpdoc' => !$isMinimal,

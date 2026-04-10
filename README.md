@@ -52,7 +52,7 @@ php artisan vendor:publish --tag=postman-generator-config
 
 ```bash
 # Generate collection + environment (ready to import)
-php artisan postman:collection --Bearer --env --no-interaction
+php artisan postman:collection --Bearer --with-env --no-interaction
 ```
 
 **That's it.** Import both files into Postman, select the environment, and start testing. The `base_url` is already set to your `APP_URL`.
@@ -319,7 +319,7 @@ Options:
   --name=NAME           Collection name
   --output=PATH         Output directory
   --strategy=STRATEGY   prefix, controller, resource, name, middleware, tag
-  --env                 Generate environment file (recommended)
+  --with-env                 Generate environment file (recommended)
   --full                Full documentation mode
   --minimal             Minimal mode (no docs)
   --no-tests            Disable auto-generated test scripts
