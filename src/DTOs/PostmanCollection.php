@@ -36,16 +36,9 @@ class PostmanCollection
             'schema' => 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
         ];
 
-        $auth = $includeBearer ? [
-            'type' => 'bearer',
-            'bearer' => [
-                [
-                    'key' => 'token',
-                    'value' => '{{Bearer}}',
-                    'type' => 'string',
-                ],
-            ],
-        ] : [];
+        // No collection-level auth - the pre-request script handles it.
+        // This prevents empty {{Bearer}} from overriding user's manual token.
+        $auth = [];
 
         $event = [];
         if ($includeBearer) {
@@ -109,9 +102,9 @@ class PostmanCollection
             '',
             '(function() {',
             '    // Try collection variable first, then environment variable',
-            '    const token = pm.collectionVariables.get("Bearer") || pm.environment.get("Bearer");',
+            '    const token = (pm.collectionVariables.get("Bearer") || pm.environment.get("Bearer") || "").trim();',
             '    ',
-            '    if (token) {',
+            '    if (token && token.length > 0) {',
             '        pm.request.headers.upsert({',
             '            key: "Authorization",',
             '            value: "Bearer " + token',
