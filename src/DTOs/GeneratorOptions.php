@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AmeerHamzaAH\PostmanGenerator\DTOs;
+namespace ProgrammersBeats\PostmanGenerator\DTOs;
 
 class GeneratorOptions
 {

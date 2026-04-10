@@ -271,12 +271,12 @@ JAVASCRIPT,
 
         // Available strategies: 'prefix', 'controller', 'resource', 'name', 'middleware', 'tag'
         'strategies' => [
-            'prefix' => \AmeerHamzaAH\PostmanGenerator\Generators\PrefixGroupingStrategy::class,
-            'controller' => \AmeerHamzaAH\PostmanGenerator\Generators\ControllerGroupingStrategy::class,
-            'resource' => \AmeerHamzaAH\PostmanGenerator\Generators\ResourceGroupingStrategy::class,
-            'name' => \AmeerHamzaAH\PostmanGenerator\Generators\NameGroupingStrategy::class,
-            'middleware' => \AmeerHamzaAH\PostmanGenerator\Generators\MiddlewareGroupingStrategy::class,
-            'tag' => \AmeerHamzaAH\PostmanGenerator\Generators\TagGroupingStrategy::class,
+            'prefix' => \ProgrammersBeats\PostmanGenerator\Generators\PrefixGroupingStrategy::class,
+            'controller' => \ProgrammersBeats\PostmanGenerator\Generators\ControllerGroupingStrategy::class,
+            'resource' => \ProgrammersBeats\PostmanGenerator\Generators\ResourceGroupingStrategy::class,
+            'name' => \ProgrammersBeats\PostmanGenerator\Generators\NameGroupingStrategy::class,
+            'middleware' => \ProgrammersBeats\PostmanGenerator\Generators\MiddlewareGroupingStrategy::class,
+            'tag' => \ProgrammersBeats\PostmanGenerator\Generators\TagGroupingStrategy::class,
         ],
 
         /*

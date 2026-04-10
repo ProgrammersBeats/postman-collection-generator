@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace AmeerHamzaAH\PostmanGenerator\Services;
+namespace ProgrammersBeats\PostmanGenerator\Services;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use AmeerHamzaAH\PostmanGenerator\Contracts\CollectionGeneratorInterface;
-use AmeerHamzaAH\PostmanGenerator\Contracts\GroupingStrategyInterface;
-use AmeerHamzaAH\PostmanGenerator\Contracts\RouteParserInterface;
-use AmeerHamzaAH\PostmanGenerator\DTOs\GeneratorOptions;
-use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
-use AmeerHamzaAH\PostmanGenerator\DTOs\PostmanCollection;
-use AmeerHamzaAH\PostmanGenerator\Generators\ControllerGroupingStrategy;
-use AmeerHamzaAH\PostmanGenerator\Generators\MiddlewareGroupingStrategy;
-use AmeerHamzaAH\PostmanGenerator\Generators\NameGroupingStrategy;
-use AmeerHamzaAH\PostmanGenerator\Generators\PrefixGroupingStrategy;
-use AmeerHamzaAH\PostmanGenerator\Generators\ResourceGroupingStrategy;
-use AmeerHamzaAH\PostmanGenerator\Generators\TagGroupingStrategy;
+use ProgrammersBeats\PostmanGenerator\Contracts\CollectionGeneratorInterface;
+use ProgrammersBeats\PostmanGenerator\Contracts\GroupingStrategyInterface;
+use ProgrammersBeats\PostmanGenerator\Contracts\RouteParserInterface;
+use ProgrammersBeats\PostmanGenerator\DTOs\GeneratorOptions;
+use ProgrammersBeats\PostmanGenerator\DTOs\ParsedRoute;
+use ProgrammersBeats\PostmanGenerator\DTOs\PostmanCollection;
+use ProgrammersBeats\PostmanGenerator\Generators\ControllerGroupingStrategy;
+use ProgrammersBeats\PostmanGenerator\Generators\MiddlewareGroupingStrategy;
+use ProgrammersBeats\PostmanGenerator\Generators\NameGroupingStrategy;
+use ProgrammersBeats\PostmanGenerator\Generators\PrefixGroupingStrategy;
+use ProgrammersBeats\PostmanGenerator\Generators\ResourceGroupingStrategy;
+use ProgrammersBeats\PostmanGenerator\Generators\TagGroupingStrategy;
 
 class CollectionGenerator implements CollectionGeneratorInterface
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AmeerHamzaAH\PostmanGenerator\Contracts;
+namespace ProgrammersBeats\PostmanGenerator\Contracts;
 
 use Illuminate\Support\Collection;
-use AmeerHamzaAH\PostmanGenerator\DTOs\GeneratorOptions;
-use AmeerHamzaAH\PostmanGenerator\DTOs\PostmanCollection;
+use ProgrammersBeats\PostmanGenerator\DTOs\GeneratorOptions;
+use ProgrammersBeats\PostmanGenerator\DTOs\PostmanCollection;
 
 interface CollectionGeneratorInterface
 {

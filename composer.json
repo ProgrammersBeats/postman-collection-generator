@@ -1,5 +1,5 @@
 {
-    "name": "ameerhamza-ah/postman-generator",
+    "name": "programmersbeats/postman-generator",
     "description": "Generate Postman collections from Laravel routes with nested folder structure, browser-based API documentation, Sanctum authentication support, and multiple grouping strategies",
     "keywords": [
         "laravel",
@@ -17,7 +17,7 @@
     "authors": [
         {
             "name": "Ameer Hamza",
-            "email": "ameerhamza.infoo@gmail.com"
+            "email": "programmersbeats@gmail.com"
         }
     ],
     "require": {
@@ -32,18 +32,18 @@
     },
     "autoload": {
         "psr-4": {
-            "AmeerHamzaAH\\PostmanGenerator\\": "src/"
+            "ProgrammersBeats\\PostmanGenerator\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "AmeerHamzaAH\\PostmanGenerator\\Tests\\": "tests/"
+            "ProgrammersBeats\\PostmanGenerator\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "AmeerHamzaAH\\PostmanGenerator\\PostmanGeneratorServiceProvider"
+                "ProgrammersBeats\\PostmanGenerator\\PostmanGeneratorServiceProvider"
             ]
         }
     },

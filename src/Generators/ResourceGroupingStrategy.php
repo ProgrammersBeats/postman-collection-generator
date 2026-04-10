@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AmeerHamzaAH\PostmanGenerator\Generators;
+namespace ProgrammersBeats\PostmanGenerator\Generators;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
+use ProgrammersBeats\PostmanGenerator\DTOs\ParsedRoute;
 
 class ResourceGroupingStrategy extends BaseGroupingStrategy
 {

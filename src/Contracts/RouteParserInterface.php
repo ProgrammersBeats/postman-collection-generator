@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AmeerHamzaAH\PostmanGenerator\Contracts;
+namespace ProgrammersBeats\PostmanGenerator\Contracts;
 
 use Illuminate\Support\Collection;
-use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
+use ProgrammersBeats\PostmanGenerator\DTOs\ParsedRoute;
 
 interface RouteParserInterface
 {

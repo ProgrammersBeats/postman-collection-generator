@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace AmeerHamzaAH\PostmanGenerator\Http\Controllers;
+namespace ProgrammersBeats\PostmanGenerator\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
-use AmeerHamzaAH\PostmanGenerator\Contracts\RouteParserInterface;
-use AmeerHamzaAH\PostmanGenerator\DTOs\ParsedRoute;
+use ProgrammersBeats\PostmanGenerator\Contracts\RouteParserInterface;
+use ProgrammersBeats\PostmanGenerator\DTOs\ParsedRoute;
 
 class ApiDocumentationController extends Controller
 {
