@@ -101,8 +101,8 @@ class RouteParser implements RouteParserInterface
         $isLoginRoute = $this->checkIsLoginRoute($route);
         $isLogoutRoute = $this->checkIsLogoutRoute($route);
 
-        // Detect which route file this route belongs to
-        $sourceFileInfo = $this->fileDetector->getSourceFile($controller);
+        // Detect which route file this route belongs to (controller + URI matching)
+        $sourceFileInfo = $this->fileDetector->getSourceFile($controller, $route->uri());
 
         return new ParsedRoute(
             uri: $route->uri(),

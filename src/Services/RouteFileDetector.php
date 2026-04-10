@@ -10,11 +10,10 @@ class RouteFileDetector
 {
     protected ?array $detectedFiles = null;
     protected ?array $controllerMap = null;
+    protected ?array $uriMap = null;
 
     /**
      * Auto-detect all registered route files from bootstrap/app.php or RouteServiceProvider.
-     *
-     * @return array<int, array{path: string, relative: string, name: string}>
      */
     public function detect(): array
     {
@@ -24,7 +23,7 @@ class RouteFileDetector
 
         $files = [];
 
-        // Try Laravel 11+ bootstrap/app.php
+        // Try Laravel 11/12/13 bootstrap/app.php
         $bootstrapPath = base_path('bootstrap/app.php');
         if (file_exists($bootstrapPath)) {
             $files = $this->parseBootstrapApp(file_get_contents($bootstrapPath));
@@ -46,6 +45,7 @@ class RouteFileDetector
                     'path' => $apiPath,
                     'relative' => 'routes/api.php',
                     'name' => 'Api',
+                    'priority' => 0,
                 ];
             }
         }
@@ -63,28 +63,28 @@ class RouteFileDetector
     }
 
     /**
-     * Parse Laravel 11+ bootstrap/app.php for route file registrations.
+     * Parse Laravel 11/12/13 bootstrap/app.php for route file registrations.
      */
     protected function parseBootstrapApp(string $content): array
     {
         $files = [];
+        $priority = 0;
 
         // Match: api: __DIR__.'/../routes/api.php'
+        // This is the PRIMARY api file - gets highest priority
         if (preg_match("/api:\s*__DIR__\s*\.\s*'[^']*\/routes\/([^']+)'/", $content, $match)) {
             $filename = $match[1];
             $files[] = [
                 'path' => base_path('routes/' . $filename),
                 'relative' => 'routes/' . $filename,
                 'name' => $this->deriveNameFromFilename($filename),
+                'priority' => $priority++,
             ];
         }
-
-        // Match: web: __DIR__.'/../routes/web.php' (skip web routes, not API)
 
         // Match: ->group(base_path('routes/candidate.php'))
         preg_match_all("/group\(\s*base_path\(\s*'routes\/([^']+)'\s*\)/", $content, $matches);
         foreach ($matches[1] as $filename) {
-            // Skip if already detected (e.g., api.php)
             $relative = 'routes/' . $filename;
             $alreadyExists = false;
             foreach ($files as $f) {
@@ -98,6 +98,7 @@ class RouteFileDetector
                     'path' => base_path($relative),
                     'relative' => $relative,
                     'name' => $this->deriveNameFromFilename($filename),
+                    'priority' => $priority++,
                 ];
             }
         }
@@ -111,28 +112,24 @@ class RouteFileDetector
     protected function parseRouteServiceProvider(string $content): array
     {
         $files = [];
+        $priority = 0;
 
-        // Match: ->group(base_path('routes/api.php'))
         preg_match_all("/group\(\s*base_path\(\s*'routes\/([^']+)'\s*\)/", $content, $matches);
         foreach ($matches[1] as $filename) {
-            // Skip web routes
-            if ($filename === 'web.php') {
+            if ($filename === 'web.php' || $filename === 'console.php') {
                 continue;
             }
             $files[] = [
                 'path' => base_path('routes/' . $filename),
                 'relative' => 'routes/' . $filename,
                 'name' => $this->deriveNameFromFilename($filename),
+                'priority' => $priority++,
             ];
         }
 
         return $files;
     }
 
-    /**
-     * Derive a human-readable folder name from a route filename.
-     * api.php -> "Api", candidate.php -> "Candidate", public.php -> "Public"
-     */
     protected function deriveNameFromFilename(string $filename): string
     {
         $name = pathinfo($filename, PATHINFO_FILENAME);
@@ -140,19 +137,21 @@ class RouteFileDetector
     }
 
     /**
-     * Build a mapping of controller class names to their source route file.
-     * Reads each route file, extracts controller references, maps them.
-     *
-     * @return array<string, array{path: string, relative: string, name: string}>
+     * Build controller-to-file AND uri-to-file mappings for route matching.
      */
-    public function buildControllerMap(): array
+    protected function buildMappings(): void
     {
         if ($this->controllerMap !== null) {
-            return $this->controllerMap;
+            return;
         }
 
-        $map = [];
+        $this->controllerMap = [];
+        $this->uriMap = [];
+
         $files = $this->detect();
+
+        // Sort by priority (api.php first) so it gets precedence for shared controllers
+        usort($files, fn($a, $b) => ($a['priority'] ?? 0) - ($b['priority'] ?? 0));
 
         foreach ($files as $file) {
             if (!file_exists($file['path'])) {
@@ -161,61 +160,106 @@ class RouteFileDetector
 
             $content = file_get_contents($file['path']);
 
-            // Extract FQCN from use statements: use App\Http\Controllers\UserController;
-            preg_match_all('/use\s+([\\\A-Za-z0-9_]+\\\\(\w+Controller))\s*;/', $content, $useMatches);
+            // Build controller map from use statements
+            // Match: use App\Http\Controllers\Api\UserController;
+            // Match: use App\Http\Controllers\Candidate\JobController;
+            preg_match_all('/use\s+([\\\\\w]+\\\\(\w+Controller))\s*;/', $content, $useMatches);
 
-            foreach ($useMatches[1] as $fqcn) {
-                $map[$fqcn] = $file;
-            }
-
-            // Also map short names: [UserController::class, 'method']
-            foreach ($useMatches[2] as $i => $shortName) {
-                $map[$shortName] = $file;
-            }
-
-            // Match controller references without use statements (invokable etc.)
-            preg_match_all('/(\w+Controller)::class/', $content, $classMatches);
-            foreach ($classMatches[1] as $shortName) {
-                if (!isset($map[$shortName])) {
-                    $map[$shortName] = $file;
+            foreach ($useMatches[1] as $i => $fqcn) {
+                // Only set if not already claimed by a higher-priority file
+                if (!isset($this->controllerMap[$fqcn])) {
+                    $this->controllerMap[$fqcn] = $file;
+                }
+                $shortName = $useMatches[2][$i];
+                if (!isset($this->controllerMap[$shortName])) {
+                    $this->controllerMap[$shortName] = $file;
                 }
             }
-        }
 
-        $this->controllerMap = $map;
-        return $map;
+            // Also match inline controller references: SomeController::class
+            preg_match_all('/(\w+Controller)::class/', $content, $classRefs);
+            foreach ($classRefs[1] as $shortName) {
+                if (!isset($this->controllerMap[$shortName])) {
+                    $this->controllerMap[$shortName] = $file;
+                }
+            }
+
+            // Build URI map - extract route URI patterns from the file
+            // Match: Route::get('users', ...) / Route::post('auth/login', ...)
+            preg_match_all("/Route::\w+\(\s*['\"]([^'\"]+)['\"]/", $content, $routeMatches);
+            foreach ($routeMatches[1] as $uri) {
+                $this->uriMap[$uri] = $file;
+            }
+
+            // Match: Route::apiResource('users', ...)
+            preg_match_all("/Route::(?:apiResource|resource)\(\s*['\"]([^'\"]+)['\"]/", $content, $resourceMatches);
+            foreach ($resourceMatches[1] as $resource) {
+                $this->uriMap[$resource] = $file;
+            }
+
+            // Match: Route::prefix('admin') to tag URIs starting with that prefix
+            preg_match_all("/Route::prefix\(\s*['\"]([^'\"]+)['\"]\s*\)/", $content, $prefixMatches);
+            foreach ($prefixMatches[1] as $prefix) {
+                // Store prefix patterns for URI matching
+                $this->uriMap['__prefix__' . $prefix] = $file;
+            }
+        }
     }
 
     /**
-     * Find which route file a controller belongs to.
-     *
-     * @return array{path: string, relative: string, name: string}|null
+     * Find which route file a route belongs to.
+     * Uses controller matching first (most reliable), then URI pattern matching.
      */
-    public function getSourceFile(?string $controllerClass): ?array
+    public function getSourceFile(?string $controllerClass, ?string $uri = null): ?array
     {
-        if (!$controllerClass) {
-            return null;
+        $this->buildMappings();
+
+        // 1. Try exact controller FQCN match
+        if ($controllerClass && isset($this->controllerMap[$controllerClass])) {
+            return $this->controllerMap[$controllerClass];
         }
 
-        $map = $this->buildControllerMap();
-
-        // Try full class name
-        if (isset($map[$controllerClass])) {
-            return $map[$controllerClass];
+        // 2. Try short controller name match
+        if ($controllerClass) {
+            $shortName = class_basename($controllerClass);
+            if (isset($this->controllerMap[$shortName])) {
+                return $this->controllerMap[$shortName];
+            }
         }
 
-        // Try short name
-        $shortName = class_basename($controllerClass);
-        if (isset($map[$shortName])) {
-            return $map[$shortName];
+        // 3. Try URI pattern matching
+        if ($uri) {
+            $cleanUri = trim($uri, '/');
+            // Remove 'api/' prefix for matching
+            $cleanUri = preg_replace('/^api\//', '', $cleanUri);
+
+            // Direct URI match
+            if (isset($this->uriMap[$cleanUri])) {
+                return $this->uriMap[$cleanUri];
+            }
+
+            // Try matching against prefix patterns
+            foreach ($this->uriMap as $pattern => $file) {
+                if (str_starts_with($pattern, '__prefix__')) {
+                    $prefix = substr($pattern, 10);
+                    if (str_starts_with($cleanUri, $prefix . '/') || $cleanUri === $prefix) {
+                        return $file;
+                    }
+                }
+            }
+
+            // Try partial URI match (first segment)
+            $firstSegment = explode('/', $cleanUri)[0] ?? '';
+            if ($firstSegment && isset($this->uriMap[$firstSegment])) {
+                return $this->uriMap[$firstSegment];
+            }
         }
 
-        return null;
+        // 4. Fallback: return the primary api.php file if it exists
+        $files = $this->detect();
+        return $files[0] ?? null;
     }
 
-    /**
-     * Check if multiple route files are registered (enables multi-file grouping).
-     */
     public function hasMultipleFiles(): bool
     {
         return count($this->detect()) > 1;
